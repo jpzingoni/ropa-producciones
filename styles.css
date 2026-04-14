@@ -471,18 +471,80 @@ a {
     display: none;
   }
 
-  .about-inner {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+  /* Hero: evitar overflow de texto con mucho tracking */
+  .hero-sub {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 0 0.5rem;
   }
 
+  /* CTA con altura mínima táctil */
+  .hero-cta {
+    padding: 0.875rem 2rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* About: reducir padding vertical */
+  .about {
+    padding: 4rem 1.5rem;
+  }
+
+  .about-inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  /* Lifestyle strip → scroll horizontal tipo carrusel */
   .lifestyle-strip {
-    height: 220px;
+    display: flex;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    height: 340px;
+    scrollbar-width: none;
+    gap: 0;
+  }
+
+  .lifestyle-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lifestyle-strip img {
+    flex: 0 0 82vw;
+    width: 82vw;
+    max-width: none;
+    height: 100%;
+    scroll-snap-align: start;
+    /* Desactivar efectos hover en touch */
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+
+  .lifestyle-strip img:hover {
+    filter: none;
+    transform: none;
+  }
+
+  /* Productos */
+  .productos {
+    padding: 4rem 1.25rem 5rem;
   }
 
   .productos-grid {
     grid-template-columns: 1fr;
     gap: 3rem;
+  }
+
+  /* Botón COMPRAR con zona táctil cómoda */
+  .card-btn {
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
 
   .footer-inner {
@@ -493,23 +555,19 @@ a {
 
 @media (max-width: 480px) {
   .about {
-    padding: 4rem 1.25rem;
+    padding: 3.5rem 1.25rem;
+  }
+
+  .hero-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
   }
 
   .productos {
-    padding: 4rem 1.25rem 5rem;
+    padding: 3.5rem 1.25rem 4.5rem;
   }
 
   .footer {
     padding: 2.5rem 1.25rem 1.5rem;
-  }
-
-  .lifestyle-strip {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-
-  .lifestyle-strip img {
-    height: 260px;
   }
 }
