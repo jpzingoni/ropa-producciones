@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proveedores — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <style>
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 8px;
+      width: 100%; max-width: 540px; max-height: 90vh;
+      overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.3);
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid #ede8e0;
+    }
+    .modal-title { font-weight: 700; font-size: .95rem; }
+    .modal-body  { padding: 20px; }
+    .modal-footer {
+      display: flex; gap: 10px; justify-content: flex-end;
+      padding: 14px 20px; border-top: 1px solid #ede8e0;
+    }
+    .btn-close {
+      background: none; border: none; font-size: 1.2rem;
+      color: #888; cursor: pointer; line-height: 1;
+    }
+    /* Card de proveedor */
+    .prov-card {
+      background: #fff; border: 1px solid #e8e0d8;
+      border-radius: 6px; padding: 14px 16px;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px;
+      transition: box-shadow .15s;
+    }
+    .prov-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .prov-card-body { flex: 1; min-width: 0; }
+    .prov-nombre { font-weight: 700; font-size: .95rem; }
+    .prov-meta   { font-size: .8rem; color: #666; margin-top: 2px; }
+    .prov-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div class="page-title">Proveedores</div>
+        <div class="page-subtitle">Directorio de talleres y proveedores de insumos</div>
+      </div>
+      <button class="btn btn-primary" onclick="abrirModal()">+ Nuevo proveedor</button>
+    </div>
+
+    <!-- Filtro rápido -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <input class="form-control" type="text" id="f-buscar"
+             placeholder="Buscar por nombre..." style="max-width:240px">
+      <select class="form-control" id="f-categoria" style="max-width:200px">
+        <option value="">Todas las categorías</option>
+        <option>Tela</option>
+        <option>Confeccion</option>
+        <option>Estampado</option>
+        <option>Packaging</option>
+        <option>Logistica</option>
+        <option>Otro</option>
+      </select>
+    </div>
+
+    <!-- Grid de cards -->
+    <div class="cards-grid" id="cards-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:32px;color:#888">Cargando...</div>
+    </div>
+
+    <!-- Sin resultados -->
+    <div id="sin-resultados" style="display:none;text-align:center;padding:40px;color:#888">
+      No hay proveedores que coincidan
+    </div>
+
+    <!-- Historial panel (se muestra al hacer click en un proveedor) -->
+    <div id="historial-panel" class="panel" style="display:none;margin-top:20px">
+      <div class="panel-header">
+        <span class="panel-title" id="historial-titulo">Historial de compras</span>
+        <button class="btn btn-secondary btn-sm" onclick="cerrarHistorial()">Cerrar</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Monto</th><th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="historial-tbody"></tbody>
+        </table>
+      </div>
+      <div id="historial-total" style="text-align:right;padding:10px 16px;font-weight:700;font-size:.9rem"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal agregar / editar proveedor -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-titulo">Nuevo proveedor</span>
+      <button class="btn-close" onclick="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <div class="form-group full">
+          <label class="form-label" for="m-nombre">Nombre <span class="req">*</span></label>
+          <input class="form-control" type="text" id="m-nombre" required
+                 placeholder="Ej: Taller La Plata, Proveedor Telas SA">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="m-categoria">Categoría <span class="req">*</span></label>
+          <select class="form-control" id="m-categoria" required>
+            <option value="">— Seleccioná —</option>
+            <option>Tela</option>
+            <option>Confeccion</option>
+            <option>Estampado</option>
+            <option>Packaging</option>
+            <option>Logistica</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="m-localidad">Localidad</label>
+          <input class="form-control" type="text" id="m-localidad"
+                 placeholder="Ej: La Plata, CABA">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="m-contacto">Contacto</label>
+          <input class="form-control" type="text" id="m-contacto"
+                 placeholder="Nombre de la persona">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="m-telefono">WhatsApp / Teléfono</label>
+          <input class="form-control" type="text" id="m-telefono"
+                 placeholder="+54 9 11 ...">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="m-instagram">Instagram</label>
+          <input class="form-control" type="text" id="m-instagram" placeholder="@usuario">
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="m-notas">Notas</label>
+          <textarea class="form-control" id="m-notas" rows="2"
+                    placeholder="Condiciones de pago, tiempos habituales, calidad..."></textarea>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="btn-desactivar" style="margin-right:auto;display:none"
+              onclick="desactivarProveedor()">Desactivar</button>
+      <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-prov" onclick="guardarProveedor()">
+        💾 Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+let _todos = [];
+let _editId = null;
+
+const CAT_ICON = {
+  'Tela': '🧵', 'Confeccion': '✂️', 'Estampado': '🖨️',
+  'Packaging': '📦', 'Logistica': '🚚', 'Otro': '📋',
+};
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/proveedores/index.html');
+
+  const toast = sessionStorage.getItem('toast');
+  if (toast) { showAlert(toast, 'success'); sessionStorage.removeItem('toast'); }
+
+  await cargarProveedores();
+}
+
+async function cargarProveedores() {
+  const { data, error } = await client
+    .from('proveedores').select('*').eq('activo', true).order('nombre');
+  if (error) { showAlert('Error al cargar: ' + error.message); return; }
+  _todos = data || [];
+  renderCards(_todos);
+}
+
+function renderCards(provs) {
+  const grid = document.getElementById('cards-grid');
+  const sin  = document.getElementById('sin-resultados');
+
+  if (!provs.length) {
+    grid.innerHTML = '';
+    sin.style.display = 'block';
+    return;
+  }
+  sin.style.display = 'none';
+
+  grid.innerHTML = provs.map(p => `
+    <div class="prov-card">
+      <div class="prov-card-body">
+        <div class="prov-nombre">
+          ${CAT_ICON[p.categoria] || '📋'} ${p.nombre}
+        </div>
+        <div class="prov-meta">
+          ${[p.categoria, p.localidad].filter(Boolean).join(' · ')}
+        </div>
+        ${p.contacto  ? `<div class="prov-meta">👤 ${p.contacto}</div>` : ''}
+        ${p.telefono  ? `<div class="prov-meta">📱 <a href="https://wa.me/${p.telefono.replace(/\D/g,'')}" target="_blank" style="color:#1565c0">${p.telefono}</a></div>` : ''}
+        ${p.instagram ? `<div class="prov-meta">📸 <a href="https://instagram.com/${p.instagram.replace('@','')}" target="_blank" style="color:#1565c0">${p.instagram}</a></div>` : ''}
+        ${p.notas     ? `<div class="prov-meta" style="margin-top:4px;color:#555;font-style:italic">"${p.notas}"</div>` : ''}
+        <button class="btn btn-secondary btn-sm" style="margin-top:10px;font-size:.72rem"
+                onclick="verHistorial('${p.id}', '${p.nombre.replace(/'/g,"\\'")}')">
+          Ver compras →
+        </button>
+      </div>
+      <div class="prov-actions">
+        <button class="btn btn-secondary btn-sm" onclick="abrirModal('${p.id}')">✏️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Filtros en tiempo real
+function filtrar() {
+  const buscar = document.getElementById('f-buscar').value.toLowerCase();
+  const cat    = document.getElementById('f-categoria').value;
+  const filtrados = _todos.filter(p => {
+    const matchText = !buscar ||
+      (p.nombre || '').toLowerCase().includes(buscar) ||
+      (p.contacto || '').toLowerCase().includes(buscar);
+    const matchCat = !cat || p.categoria === cat;
+    return matchText && matchCat;
+  });
+  renderCards(filtrados);
+}
+document.getElementById('f-buscar').addEventListener('input', filtrar);
+document.getElementById('f-categoria').addEventListener('change', filtrar);
+
+// Modal
+function abrirModal(id = null) {
+  _editId = id;
+  document.getElementById('modal-titulo').textContent = id ? 'Editar proveedor' : 'Nuevo proveedor';
+  document.getElementById('btn-desactivar').style.display = id ? 'block' : 'none';
+
+  // Limpiar campos
+  ['m-nombre','m-categoria','m-localidad','m-contacto','m-telefono','m-instagram','m-notas']
+    .forEach(f => {
+      const el = document.getElementById(f);
+      el.value = '';
+    });
+
+  if (id) {
+    const p = _todos.find(x => x.id === id);
+    if (p) {
+      document.getElementById('m-nombre').value    = p.nombre     || '';
+      document.getElementById('m-categoria').value = p.categoria  || '';
+      document.getElementById('m-localidad').value = p.localidad  || '';
+      document.getElementById('m-contacto').value  = p.contacto   || '';
+      document.getElementById('m-telefono').value  = p.telefono   || '';
+      document.getElementById('m-instagram').value = p.instagram  || '';
+      document.getElementById('m-notas').value     = p.notas      || '';
+    }
+  }
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('m-nombre').focus();
+}
+
+function cerrarModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  _editId = null;
+}
+
+// Cerrar modal al hacer click fuera
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) cerrarModal();
+});
+
+async function guardarProveedor() {
+  const nombre    = document.getElementById('m-nombre').value.trim();
+  const categoria = document.getElementById('m-categoria').value;
+  if (!nombre || !categoria) {
+    showAlert('Nombre y categoría son obligatorios');
+    return;
+  }
+
+  const btn = document.getElementById('btn-guardar-prov');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  const payload = {
+    nombre,
+    categoria,
+    localidad:  document.getElementById('m-localidad').value.trim()  || null,
+    contacto:   document.getElementById('m-contacto').value.trim()   || null,
+    telefono:   document.getElementById('m-telefono').value.trim()   || null,
+    instagram:  document.getElementById('m-instagram').value.trim()  || null,
+    notas:      document.getElementById('m-notas').value.trim()      || null,
+  };
+
+  const { error } = _editId
+    ? await client.from('proveedores').update(payload).eq('id', _editId)
+    : await client.from('proveedores').insert(payload);
+
+  btn.disabled = false; btn.textContent = '💾 Guardar';
+
+  if (error) { showAlert('Error: ' + error.message); return; }
+
+  cerrarModal();
+  showAlert(_editId ? 'Proveedor actualizado' : 'Proveedor agregado', 'success');
+  await cargarProveedores();
+}
+
+async function desactivarProveedor() {
+  if (!_editId) return;
+  if (!confirm('¿Desactivar este proveedor? No aparecerá más en los formularios.')) return;
+  const { error } = await client.from('proveedores').update({ activo: false }).eq('id', _editId);
+  if (error) { showAlert('Error: ' + error.message); return; }
+  cerrarModal();
+  showAlert('Proveedor desactivado', 'success');
+  await cargarProveedores();
+}
+
+// Historial de compras por proveedor
+async function verHistorial(provId, provNombre) {
+  document.getElementById('historial-titulo').textContent = 'Compras — ' + provNombre;
+  document.getElementById('historial-panel').style.display = 'block';
+  document.getElementById('historial-tbody').innerHTML =
+    '<tr><td colspan="5" style="text-align:center;padding:16px;color:#888">Cargando...</td></tr>';
+  document.getElementById('historial-panel').scrollIntoView({ behavior: 'smooth' });
+
+  const { data } = await client
+    .from('compras').select('fecha, descripcion, categoria_pl, monto_total, estado_pago')
+    .eq('proveedor_id', provId)
+    .order('fecha', { ascending: false });
+
+  const rows = data || [];
+  const total = rows.reduce((s, r) => s + Number(r.monto_total), 0);
+
+  document.getElementById('historial-tbody').innerHTML = rows.length
+    ? rows.map(r => `
+        <tr>
+          <td>${fechaCorta(r.fecha)}</td>
+          <td>${r.descripcion}</td>
+          <td style="font-size:.78rem;color:#666">${r.categoria_pl}</td>
+          <td style="font-weight:600">${pesos(r.monto_total)}</td>
+          <td>${badgeEstado(r.estado_pago)}</td>
+        </tr>
+      `).join('')
+    : '<tr><td colspan="5" style="text-align:center;padding:16px;color:#888">Sin compras registradas</td></tr>';
+
+  document.getElementById('historial-total').textContent =
+    rows.length ? `Total: ${pesos(total)} (${rows.length} compras)` : '';
+}
+
+function cerrarHistorial() {
+  document.getElementById('historial-panel').style.display = 'none';
+}
+
+init();
+</script>
+</body>
+</html>

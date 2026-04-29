@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resumen mensual — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <style>
+    .categoria-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid #f0ebe3;
+    }
+    .categoria-bar:last-child { border-bottom: none; }
+    .cat-nombre { width: 190px; font-size: .85rem; flex-shrink: 0; }
+    .cat-barra-wrap { flex: 1; background: #f0ebe3; border-radius: 4px; height: 10px; overflow: hidden; }
+    .cat-barra { height: 100%; background: #0d0d0d; border-radius: 4px; transition: width .4s; }
+    .cat-monto { width: 110px; text-align: right; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
+    .cat-pct   { width: 42px; text-align: right; font-size: .78rem; color: #888; flex-shrink: 0; }
+    .mes-nav   { display: flex; align-items: center; gap: 12px; }
+    .mes-nav button {
+      background: none; border: 1px solid #d8d0c8; border-radius: 6px;
+      width: 32px; height: 32px; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mes-nav button:hover { background: #f0ebe3; }
+    .mes-label { font-size: 1rem; font-weight: 700; min-width: 140px; text-align: center; }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="page-title">Resumen mensual</div>
+        <div class="page-subtitle">Gastos agrupados por categoría P&L</div>
+      </div>
+      <!-- Navegacion de mes -->
+      <div class="mes-nav">
+        <button onclick="cambiarMes(-1)">‹</button>
+        <span class="mes-label" id="mes-label">—</span>
+        <button onclick="cambiarMes(1)">›</button>
+      </div>
+    </div>
+
+    <!-- KPIs del mes -->
+    <div class="kpi-grid" style="margin-bottom:20px">
+      <div class="kpi-card black">
+        <div class="kpi-label">Total gastos del mes</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub" id="kpi-registros">— registros</div>
+      </div>
+      <div class="kpi-card cream">
+        <div class="kpi-label">Vs. mes anterior</div>
+        <div class="kpi-value" id="kpi-vs">—</div>
+        <div class="kpi-sub" id="kpi-vs-sub">comparativo</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">Pendiente de pago</div>
+        <div class="kpi-value" id="kpi-pendiente">—</div>
+        <div class="kpi-sub" id="kpi-pend-count">— compras</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+      <!-- Tabla por categoria -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Por categoría P&L</span></div>
+        <div class="panel-body" id="panel-categorias">
+          <div style="text-align:center;color:#888;padding:20px">Cargando...</div>
+        </div>
+      </div>
+
+      <!-- Grafico de barras -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Distribución</span></div>
+        <div class="panel-body">
+          <canvas id="chart-dist" height="260"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Compras pendientes de pago -->
+    <div class="panel" style="margin-top:0" id="panel-pendientes">
+      <div class="panel-header">
+        <span class="panel-title">⚠️ Pendientes de pago</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Proveedor</th><th>Descripción</th><th>Monto</th><th>Estado</th></tr>
+          </thead>
+          <tbody id="tbody-pendientes"></tbody>
+        </table>
+      </div>
+      <div id="sin-pendientes" style="display:none;text-align:center;padding:20px;color:#888">
+        ✅ Sin pagos pendientes este mes
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+let _año, _mes, _chart = null;
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/resumen.html');
+
+  const now = new Date();
+  _año = now.getFullYear();
+  _mes = now.getMonth() + 1;
+  await cargarResumen();
+}
+
+function cambiarMes(delta) {
+  _mes += delta;
+  if (_mes > 12) { _mes = 1; _año++; }
+  if (_mes < 1)  { _mes = 12; _año--; }
+  cargarResumen();
+}
+
+async function cargarResumen() {
+  const inicio = `${_año}-${String(_mes).padStart(2,'0')}-01`;
+  const fin    = new Date(_año, _mes, 0).toISOString().split('T')[0];
+
+  // Etiqueta del mes
+  const label = new Date(_año, _mes - 1, 1)
+    .toLocaleString('es-AR', { month: 'long', year: 'numeric' });
+  document.getElementById('mes-label').textContent =
+    label.charAt(0).toUpperCase() + label.slice(1);
+
+  // Datos del mes actual
+  const { data } = await client.from('compras').select('*')
+    .gte('fecha', inicio).lte('fecha', fin);
+  const rows = data || [];
+
+  // Datos del mes anterior
+  let mesAnt = _mes - 1, añoAnt = _año;
+  if (mesAnt < 1) { mesAnt = 12; añoAnt--; }
+  const inicioAnt = `${añoAnt}-${String(mesAnt).padStart(2,'0')}-01`;
+  const finAnt    = new Date(añoAnt, mesAnt, 0).toISOString().split('T')[0];
+  const { data: rowsAnt } = await client.from('compras').select('monto_total')
+    .gte('fecha', inicioAnt).lte('fecha', finAnt);
+  const totalAnt = (rowsAnt || []).reduce((s,r) => s + Number(r.monto_total), 0);
+
+  // KPIs
+  const total    = rows.reduce((s,r) => s + Number(r.monto_total), 0);
+  const pendRows = rows.filter(r => r.estado_pago !== 'Pagado');
+  const pendMonto= pendRows.reduce((s,r) => s + Number(r.monto_total), 0);
+
+  document.getElementById('kpi-total').textContent      = pesos(total);
+  document.getElementById('kpi-registros').textContent  = rows.length + ' registros';
+  document.getElementById('kpi-pendiente').textContent  = pesos(pendMonto);
+  document.getElementById('kpi-pend-count').textContent = pendRows.length + ' sin pagar';
+
+  // Vs mes anterior
+  const diff = total - totalAnt;
+  const pct  = totalAnt > 0 ? Math.round(Math.abs(diff) / totalAnt * 100) : null;
+  const vsEl = document.getElementById('kpi-vs');
+  if (totalAnt === 0) {
+    vsEl.textContent = '—';
+    document.getElementById('kpi-vs-sub').textContent = 'sin datos anteriores';
+  } else {
+    vsEl.textContent = (diff >= 0 ? '+' : '') + pesos(diff);
+    vsEl.style.color = diff > 0 ? '#c62828' : '#2e7d32';
+    document.getElementById('kpi-vs-sub').textContent =
+      (pct !== null ? pct + '% ' : '') + (diff >= 0 ? 'más que el mes pasado' : 'menos que el mes pasado');
+  }
+
+  // Agrupar por categoria
+  const porCat = {};
+  CATEGORIAS_PL.forEach(c => porCat[c] = 0);
+  rows.forEach(r => {
+    if (porCat[r.categoria_pl] !== undefined) porCat[r.categoria_pl] += Number(r.monto_total);
+    else porCat[r.categoria_pl] = (porCat[r.categoria_pl] || 0) + Number(r.monto_total);
+  });
+
+  const catOrdenadas = Object.entries(porCat)
+    .filter(([,v]) => v > 0)
+    .sort((a,b) => b[1] - a[1]);
+
+  const maxVal = catOrdenadas[0]?.[1] || 1;
+
+  // Panel de categorias
+  const panelCat = document.getElementById('panel-categorias');
+  panelCat.innerHTML = catOrdenadas.length
+    ? catOrdenadas.map(([cat, monto]) => `
+        <div class="categoria-bar">
+          <div class="cat-nombre">${cat}</div>
+          <div class="cat-barra-wrap">
+            <div class="cat-barra" style="width:${Math.round(monto/maxVal*100)}%"></div>
+          </div>
+          <div class="cat-monto">${pesos(monto)}</div>
+          <div class="cat-pct">${total > 0 ? Math.round(monto/total*100) + '%' : ''}</div>
+        </div>
+      `).join('')
+    : '<div style="text-align:center;color:#888;padding:20px">Sin datos para este mes</div>';
+
+  // Grafico
+  if (_chart) _chart.destroy();
+  if (catOrdenadas.length) {
+    _chart = new Chart(document.getElementById('chart-dist'), {
+      type: 'bar',
+      data: {
+        labels: catOrdenadas.map(([c]) => c.length > 16 ? c.slice(0,14)+'…' : c),
+        datasets: [{
+          data: catOrdenadas.map(([,v]) => v),
+          backgroundColor: catOrdenadas.map((_,i) =>
+            i === 0 ? '#0d0d0d' : `rgba(13,13,13,${0.7 - i*0.08})`),
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k', font: { size: 10 } },
+            grid: { color: '#f0ebe3' }
+          },
+          x: { ticks: { font: { size: 9 } }, grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Pendientes
+  const tbody = document.getElementById('tbody-pendientes');
+  const sinPend = document.getElementById('sin-pendientes');
+  if (pendRows.length) {
+    sinPend.style.display = 'none';
+    tbody.innerHTML = pendRows.map(r => `
+      <tr style="cursor:pointer" onclick="window.location='/admin/compras/editar.html?id=${r.id}'">
+        <td>${fechaCorta(r.fecha)}</td>
+        <td>${r.proveedor_nombre || '—'}</td>
+        <td>${r.descripcion}</td>
+        <td style="font-weight:600">${pesos(r.monto_total)}</td>
+        <td>${badgeEstado(r.estado_pago)}</td>
+      </tr>
+    `).join('');
+  } else {
+    tbody.innerHTML = '';
+    sinPend.style.display = 'block';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

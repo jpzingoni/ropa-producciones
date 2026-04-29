@@ -7,6 +7,7 @@ function renderNav(activeLink) {
     { href: "/admin/compras/nueva.html",     icon: "➕", label: "Nueva compra", group: "Compras" },
     { href: "/admin/compras/index.html",     icon: "📋", label: "Ver todas",    group: "Compras" },
     { href: "/admin/proveedores/index.html", icon: "🏭", label: "Proveedores",  group: "Datos" },
+    { href: "/admin/resumen.html",          icon: "📈", label: "Resumen",       group: "Datos" },
   ];
 
   // Agrupar
