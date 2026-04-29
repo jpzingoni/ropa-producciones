@@ -301,7 +301,25 @@ tbody tr:nth-child(even):hover { background: var(--cream-l); }
 
 
 /* ── Modo solo lectura ────────────────────────────────────────────────────── */
-/* Los elementos con data-admin se ocultan cuando el body tiene clase .readonly */
-body.readonly [data-admin] {
-  display: none !important;
+#banner-readonly {
+  background: #1565c0;
+  color: #fff;
+  text-align: center;
+  padding: 9px 16px;
+  font-size: .82rem;
+  letter-spacing: .2px;
+  grid-column: 1 / -1;
+}
+
+/* Botones de accion bloqueados: visibles pero con cursor de bloqueo */
+body.readonly .btn-danger,
+body.readonly [data-write] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Inputs y selects en modo lectura: visualmente normales, el bloqueo es en submit */
+body.readonly .btn-primary[type="submit"] {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

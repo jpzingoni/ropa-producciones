@@ -11,9 +11,7 @@ function getClient() {
 }
 
 // Verifica session activa. Si no hay, redirige al login.
-// Consulta la tabla user_roles para saber si es readonly.
-// Si es readonly y está en una pagina de escritura, redirige al index de esa seccion.
-// Aplica clase CSS 'readonly' al body para ocultar elementos de accion.
+// Consulta la tabla user_roles para saber si es readonly y aplica restricciones.
 async function requireAuth() {
   const client = getClient();
   const { data: { session } } = await client.auth.getSession();
@@ -22,7 +20,7 @@ async function requireAuth() {
     return null;
   }
 
-  // Consultar rol desde la base de datos (mas confiable que JWT claims)
+  // Consultar rol desde la base de datos
   const { data: roleData } = await client
     .from('user_roles')
     .select('role')
@@ -33,18 +31,50 @@ async function requireAuth() {
 
   if (role === 'readonly') {
     document.body.classList.add('readonly');
-
-    // Redirigir fuera de paginas de escritura
-    const path = window.location.pathname;
-    const esEscritura = path.includes('/nueva.html') || path.includes('/editar.html');
-    if (esEscritura) {
-      const destino = path.replace(/\/(nueva|editar)\.html.*$/, '/index.html');
-      window.location.href = destino;
-      return null;
-    }
+    _aplicarModoLectura();
   }
 
   return session;
+}
+
+function _aplicarModoLectura() {
+  // Banner informativo
+  const banner = document.createElement('div');
+  banner.id = 'banner-readonly';
+  banner.innerHTML = '👁&nbsp;&nbsp;Estás en <strong>modo solo lectura</strong> — podés explorar el sistema pero no podés guardar cambios';
+  // Insertar despues del header
+  const header = document.querySelector('.admin-header');
+  if (header) header.insertAdjacentElement('afterend', banner);
+  else document.body.insertBefore(banner, document.body.firstChild);
+
+  const MSG = 'No tenés permisos para realizar esta acción. Estás en modo solo lectura.';
+
+  // Bloquear envio de formularios (nueva y editar)
+  document.addEventListener('submit', e => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    showAlert(MSG, 'error');
+  }, true);
+
+  // Bloquear botones de accion destructiva (eliminar, desactivar)
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-danger');
+    if (btn) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      showAlert(MSG, 'error');
+    }
+  }, true);
+
+  // Bloquear acciones de escritura marcadas con data-write
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-write]');
+    if (btn) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      showAlert(MSG, 'error');
+    }
+  }, true);
 }
 
 // Cierra la session y redirige al login
