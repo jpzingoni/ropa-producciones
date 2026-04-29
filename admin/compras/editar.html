@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar compra — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <a href="/admin/compras/index.html" class="btn btn-secondary btn-sm">← Volver</a>
+      <div>
+        <div class="page-title">Editar compra</div>
+        <div class="page-subtitle" id="subtitulo">Cargando...</div>
+      </div>
+    </div>
+
+    <form id="form-compra" style="opacity:0;transition:opacity .2s">
+
+      <!-- Factura adjunta (si tiene) -->
+      <div id="factura-panel" class="panel" style="display:none">
+        <div class="panel-header">
+          <span class="panel-title">Factura adjunta</span>
+          <button type="button" class="btn btn-danger btn-sm" id="btn-borrar-archivo">
+            Quitar archivo
+          </button>
+        </div>
+        <div class="panel-body" style="display:flex;align-items:center;gap:16px">
+          <img id="factura-img" style="max-height:120px;border-radius:4px;border:1px solid #e8e0d8;display:none" alt="factura">
+          <a id="factura-link" href="#" target="_blank" class="btn btn-secondary btn-sm" style="display:none">
+            📄 Ver archivo
+          </a>
+        </div>
+      </div>
+
+      <!-- Datos principales -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Datos principales</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="fecha">Fecha <span class="req">*</span></label>
+              <input class="form-control" type="date" id="fecha" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="proveedor_id">Proveedor</label>
+              <select class="form-control" id="proveedor_id">
+                <option value="">— Sin proveedor —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="proveedor_libre">Proveedor (texto libre)</label>
+              <input class="form-control" type="text" id="proveedor_libre"
+                     placeholder="Si no está en la lista">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="categoria_pl">Categoría P&L <span class="req">*</span></label>
+              <select class="form-control" id="categoria_pl" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="codigo_pl">Código P&L</label>
+              <input class="form-control" type="text" id="codigo_pl" readonly
+                     style="background:#f5f5f5;color:#888">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="tipo_prenda">Tipo</label>
+              <select class="form-control" id="tipo_prenda">
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label class="form-label" for="descripcion">Descripción <span class="req">*</span></label>
+              <input class="form-control" type="text" id="descripcion" required>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Montos -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Monto</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="cantidad">Cantidad</label>
+              <input class="form-control" type="number" id="cantidad" min="0" step="1">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="precio_unitario">Precio unitario ($)</label>
+              <input class="form-control" type="number" id="precio_unitario" min="0" step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="monto_total">Monto total ($) <span class="req">*</span></label>
+              <input class="form-control" type="number" id="monto_total" min="0" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="estado_pago">Estado de pago <span class="req">*</span></label>
+              <select class="form-control" id="estado_pago" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="nro_factura">N° factura / remito</label>
+              <input class="form-control" type="text" id="nro_factura">
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Reemplazar archivo + notas -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Reemplazar factura / Notas</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="archivo">Nuevo archivo (reemplaza el actual)</label>
+              <input class="form-control" type="file" id="archivo"
+                     accept="image/*,.pdf" capture="environment" style="padding:6px">
+            </div>
+
+            <div class="form-group full">
+              <label class="form-label" for="notas">Notas</label>
+              <textarea class="form-control" id="notas" rows="2"></textarea>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div style="display:flex;gap:10px;justify-content:space-between;margin-top:4px">
+        <button type="button" class="btn btn-danger" id="btn-eliminar">
+          🗑 Eliminar registro
+        </button>
+        <div style="display:flex;gap:10px">
+          <a href="/admin/compras/index.html" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary" id="btn-guardar">
+            💾 Guardar cambios
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+const id = new URLSearchParams(window.location.search).get('id');
+let registroActual = null;
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/compras/index.html');
+
+  if (!id) { window.location.href = '/admin/compras/index.html'; return; }
+
+  // Poblar selects
+  const selCat = document.getElementById('categoria_pl');
+  CATEGORIAS_PL.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c; selCat.appendChild(opt);
+  });
+  const selTipo = document.getElementById('tipo_prenda');
+  TIPOS_PRENDA.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t; selTipo.appendChild(opt);
+  });
+  const selEst = document.getElementById('estado_pago');
+  ESTADOS_PAGO.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e; opt.textContent = e; selEst.appendChild(opt);
+  });
+
+  // Cargar proveedores
+  const { data: provs } = await client.from('proveedores').select('id, nombre').eq('activo', true).order('nombre');
+  const selProv = document.getElementById('proveedor_id');
+  (provs || []).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = p.nombre; selProv.appendChild(opt);
+  });
+
+  // Cargar registro
+  const { data, error } = await client.from('compras').select('*').eq('id', id).single();
+  if (error || !data) { showAlert('Registro no encontrado'); return; }
+  registroActual = data;
+
+  document.getElementById('subtitulo').textContent = data.descripcion;
+  rellenarForm(data);
+  document.getElementById('form-compra').style.opacity = '1';
+}
+
+function rellenarForm(d) {
+  document.getElementById('fecha').value           = d.fecha || '';
+  document.getElementById('proveedor_id').value    = d.proveedor_id || '';
+  document.getElementById('proveedor_libre').value = d.proveedor_id ? '' : (d.proveedor_nombre || '');
+  document.getElementById('categoria_pl').value    = d.categoria_pl || '';
+  document.getElementById('codigo_pl').value       = d.codigo_pl || '';
+  document.getElementById('tipo_prenda').value     = d.tipo_prenda || '';
+  document.getElementById('descripcion').value     = d.descripcion || '';
+  document.getElementById('cantidad').value        = d.cantidad || '';
+  document.getElementById('precio_unitario').value = d.precio_unitario || '';
+  document.getElementById('monto_total').value     = d.monto_total || '';
+  document.getElementById('estado_pago').value     = d.estado_pago || '';
+  document.getElementById('nro_factura').value     = d.nro_factura || '';
+  document.getElementById('notas').value           = d.notas || '';
+
+  // Mostrar archivo adjunto si existe
+  if (d.archivo_url) {
+    document.getElementById('factura-panel').style.display = 'block';
+    const esImagen = /\.(jpg|jpeg|png|gif|webp)$/i.test(d.archivo_url);
+    if (esImagen) {
+      const img = document.getElementById('factura-img');
+      img.src = d.archivo_url;
+      img.style.display = 'block';
+    } else {
+      const link = document.getElementById('factura-link');
+      link.href = d.archivo_url;
+      link.style.display = 'inline-flex';
+    }
+  }
+}
+
+// Auto-assign codigo_pl
+document.getElementById('categoria_pl').addEventListener('change', function() {
+  document.getElementById('codigo_pl').value = CATEGORIA_A_CODIGO[this.value] || '';
+});
+
+// Auto-calcular monto
+['cantidad', 'precio_unitario'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const cant   = parseFloat(document.getElementById('cantidad').value) || 0;
+    const precio = parseFloat(document.getElementById('precio_unitario').value) || 0;
+    if (cant > 0 && precio > 0) {
+      document.getElementById('monto_total').value = (cant * precio).toFixed(2);
+    }
+  });
+});
+
+// Quitar archivo adjunto
+document.getElementById('btn-borrar-archivo').addEventListener('click', () => {
+  if (!confirm('¿Quitar el archivo adjunto de este registro?')) return;
+  document.getElementById('factura-panel').style.display = 'none';
+  registroActual.archivo_url = null;
+});
+
+// Guardar cambios
+document.getElementById('form-compra').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    const provId    = document.getElementById('proveedor_id').value;
+    const provLibre = document.getElementById('proveedor_libre').value.trim();
+    let provNombre  = provLibre;
+    if (provId) {
+      const opt = document.querySelector(`#proveedor_id option[value="${provId}"]`);
+      provNombre = opt ? opt.textContent : provLibre;
+    }
+
+    // Subir nuevo archivo si hay uno
+    let archivo_url = registroActual.archivo_url;
+    const fileInput = document.getElementById('archivo');
+    if (fileInput.files[0]) {
+      const file = fileInput.files[0];
+      const ext  = file.name.split('.').pop();
+      const path = `${Date.now()}.${ext}`;
+      const { error: upErr } = await client.storage.from('facturas').upload(path, file);
+      if (upErr) throw upErr;
+      const { data: urlData } = client.storage.from('facturas').getPublicUrl(path);
+      archivo_url = urlData.publicUrl;
+    }
+
+    const payload = {
+      fecha:            document.getElementById('fecha').value,
+      proveedor_id:     provId || null,
+      proveedor_nombre: provNombre || null,
+      categoria_pl:     document.getElementById('categoria_pl').value,
+      codigo_pl:        document.getElementById('codigo_pl').value || null,
+      descripcion:      document.getElementById('descripcion').value.trim(),
+      tipo_prenda:      document.getElementById('tipo_prenda').value || null,
+      cantidad:         parseInt(document.getElementById('cantidad').value) || null,
+      precio_unitario:  parseFloat(document.getElementById('precio_unitario').value) || null,
+      monto_total:      parseFloat(document.getElementById('monto_total').value),
+      estado_pago:      document.getElementById('estado_pago').value,
+      nro_factura:      document.getElementById('nro_factura').value.trim() || null,
+      archivo_url,
+      notas:            document.getElementById('notas').value.trim() || null,
+      updated_at:       new Date().toISOString(),
+    };
+
+    const { error } = await client.from('compras').update(payload).eq('id', id);
+    if (error) throw error;
+
+    sessionStorage.setItem('toast', 'Cambios guardados correctamente');
+    window.location.href = '/admin/compras/index.html';
+
+  } catch (err) {
+    showAlert('Error al guardar: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar cambios';
+  }
+});
+
+// Eliminar registro
+document.getElementById('btn-eliminar').addEventListener('click', async () => {
+  if (!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+  const { error } = await client.from('compras').delete().eq('id', id);
+  if (error) { showAlert('Error al eliminar: ' + error.message); return; }
+  sessionStorage.setItem('toast', 'Registro eliminado');
+  window.location.href = '/admin/compras/index.html';
+});
+
+init();
+</script>
+</body>
+</html>

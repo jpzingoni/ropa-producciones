@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compras — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div>
+        <div class="page-title">Compras</div>
+        <div class="page-subtitle">Historial de gastos registrados</div>
+      </div>
+      <a href="/admin/compras/nueva.html" class="btn btn-primary">+ Nueva compra</a>
+    </div>
+
+    <!-- Totales rapidos -->
+    <div class="kpi-grid" style="margin-bottom:20px">
+      <div class="kpi-card black">
+        <div class="kpi-label">Total filtrado</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub" id="kpi-count">— registros</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">Pendiente de pago</div>
+        <div class="kpi-value" id="kpi-pendiente">—</div>
+        <div class="kpi-sub" id="kpi-pend-count">— compras</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="panel">
+      <div class="panel-body" style="padding:14px 18px">
+        <div class="filters">
+          <div class="form-group">
+            <label class="form-label">Mes</label>
+            <input class="form-control" type="month" id="f-mes" style="width:160px">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categoría P&L</label>
+            <select class="form-control" id="f-categoria" style="width:200px">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estado</label>
+            <select class="form-control" id="f-estado" style="width:150px">
+              <option value="">Todos</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Pagado">Pagado</option>
+              <option value="Pago parcial">Pago parcial</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Buscar</label>
+            <input class="form-control" type="text" id="f-buscar"
+                   placeholder="Descripción, proveedor..." style="width:200px">
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <button class="btn btn-primary" onclick="cargarCompras()">Filtrar</button>
+            <button class="btn btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
+            <button class="btn btn-secondary" onclick="exportarExcel()" id="btn-export">⬇ Excel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Proveedor</th>
+              <th>Descripción</th>
+              <th>Categoría P&L</th>
+              <th>Monto</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="sin-resultados" style="display:none;text-align:center;padding:32px;color:#888">
+        No hay compras que coincidan con los filtros
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- SheetJS para export Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+let _data = [];
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/compras/index.html');
+
+  // Mes actual por defecto
+  const now = new Date();
+  document.getElementById('f-mes').value =
+    now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
+  // Poblar categorias
+  const sel = document.getElementById('f-categoria');
+  CATEGORIAS_PL.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    sel.appendChild(opt);
+  });
+
+  // Toast de exito desde nueva.html
+  const toast = sessionStorage.getItem('toast');
+  if (toast) { showAlert(toast, 'success'); sessionStorage.removeItem('toast'); }
+
+  await cargarCompras();
+}
+
+async function cargarCompras() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#888">Cargando...</td></tr>';
+
+  let q = client.from('compras').select('*').order('fecha', { ascending: false });
+
+  const mes = document.getElementById('f-mes').value;
+  if (mes) {
+    const [y, m] = mes.split('-');
+    const inicio = `${y}-${m}-01`;
+    const fin    = new Date(y, m, 0).toISOString().split('T')[0]; // ultimo dia del mes
+    q = q.gte('fecha', inicio).lte('fecha', fin);
+  }
+
+  const cat = document.getElementById('f-categoria').value;
+  if (cat) q = q.eq('categoria_pl', cat);
+
+  const est = document.getElementById('f-estado').value;
+  if (est) q = q.eq('estado_pago', est);
+
+  const { data, error } = await q.limit(500);
+  if (error) { showAlert('Error al cargar: ' + error.message); return; }
+
+  // Filtro de busqueda en cliente
+  const buscar = document.getElementById('f-buscar').value.toLowerCase().trim();
+  _data = (data || []).filter(r => {
+    if (!buscar) return true;
+    return (r.descripcion || '').toLowerCase().includes(buscar)
+        || (r.proveedor_nombre || '').toLowerCase().includes(buscar)
+        || (r.notas || '').toLowerCase().includes(buscar);
+  });
+
+  renderTabla(_data);
+  actualizarKPIs(_data);
+}
+
+function renderTabla(rows) {
+  const tbody = document.getElementById('tbody');
+  const sin   = document.getElementById('sin-resultados');
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    sin.style.display = 'block';
+    return;
+  }
+  sin.style.display = 'none';
+
+  tbody.innerHTML = rows.map(r => `
+    <tr style="cursor:pointer" onclick="window.location='/admin/compras/editar.html?id=${r.id}'">
+      <td style="white-space:nowrap">${fechaCorta(r.fecha)}</td>
+      <td>${r.proveedor_nombre || '<span style="color:#aaa">—</span>'}</td>
+      <td>
+        ${r.descripcion}
+        ${r.nro_factura ? `<br><span style="font-size:.72rem;color:#888">Fact. ${r.nro_factura}</span>` : ''}
+      </td>
+      <td><span style="font-size:.78rem;color:#666">${r.categoria_pl}</span></td>
+      <td style="font-weight:600;white-space:nowrap">${pesos(r.monto_total)}</td>
+      <td>${badgeEstado(r.estado_pago)}</td>
+      <td>
+        ${r.archivo_url
+          ? `<a href="${r.archivo_url}" target="_blank" onclick="event.stopPropagation()"
+               style="font-size:.78rem;color:#1565c0">📎 ver</a>`
+          : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function actualizarKPIs(rows) {
+  const total    = rows.reduce((s, r) => s + Number(r.monto_total), 0);
+  const pendRows = rows.filter(r => r.estado_pago !== 'Pagado');
+  const pend     = pendRows.reduce((s, r) => s + Number(r.monto_total), 0);
+
+  document.getElementById('kpi-total').textContent     = pesos(total);
+  document.getElementById('kpi-count').textContent     = rows.length + ' registros';
+  document.getElementById('kpi-pendiente').textContent = pesos(pend);
+  document.getElementById('kpi-pend-count').textContent= pendRows.length + ' sin pagar';
+}
+
+function limpiarFiltros() {
+  const now = new Date();
+  document.getElementById('f-mes').value =
+    now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  document.getElementById('f-categoria').value = '';
+  document.getElementById('f-estado').value    = '';
+  document.getElementById('f-buscar').value    = '';
+  cargarCompras();
+}
+
+function exportarExcel() {
+  if (!_data.length) { showAlert('No hay datos para exportar', 'error'); return; }
+  const rows = _data.map(r => ({
+    'Fecha':           r.fecha,
+    'Proveedor':       r.proveedor_nombre || '',
+    'Descripcion':     r.descripcion,
+    'Categoria PL':    r.categoria_pl,
+    'Codigo PL':       r.codigo_pl || '',
+    'Tipo':            r.tipo_prenda || '',
+    'Cantidad':        r.cantidad || '',
+    'Precio Unitario': r.precio_unitario || '',
+    'Monto Total':     r.monto_total,
+    'Estado Pago':     r.estado_pago,
+    'Nro Factura':     r.nro_factura || '',
+    'Notas':           r.notas || '',
+    'Signo':           r.signo || '-',
+  }));
+  const ws  = XLSX.utils.json_to_sheet(rows);
+  const wb  = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Compras');
+  const mes = document.getElementById('f-mes').value || 'todos';
+  XLSX.writeFile(wb, `ROPA_Compras_${mes}.xlsx`);
+}
+
+// Buscar al escribir (con debounce)
+let debTimer;
+document.getElementById('f-buscar').addEventListener('input', () => {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(cargarCompras, 350);
+});
+
+init();
+</script>
+</body>
+</html>

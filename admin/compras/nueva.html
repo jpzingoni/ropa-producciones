@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nueva compra — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div class="page-title">Nueva compra</div>
+    <div class="page-subtitle">Registrá un gasto a proveedor o insumo de producción</div>
+
+    <form id="form-compra">
+      <!-- Bloque 1: Datos principales -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Datos principales</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="fecha">Fecha <span class="req">*</span></label>
+              <input class="form-control" type="date" id="fecha" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="proveedor_id">Proveedor</label>
+              <select class="form-control" id="proveedor_id">
+                <option value="">— Sin proveedor —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="proveedor_libre">Proveedor (texto libre)</label>
+              <input class="form-control" type="text" id="proveedor_libre"
+                     placeholder="Si no está en la lista, escribí acá">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="categoria_pl">Categoría P&L <span class="req">*</span></label>
+              <select class="form-control" id="categoria_pl" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="codigo_pl">Código P&L</label>
+              <input class="form-control" type="text" id="codigo_pl" readonly
+                     style="background:#f5f5f5;color:#888" placeholder="Se asigna automático">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="tipo_prenda">Tipo</label>
+              <select class="form-control" id="tipo_prenda">
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label class="form-label" for="descripcion">Descripción <span class="req">*</span></label>
+              <input class="form-control" type="text" id="descripcion" required
+                     placeholder="Ej: Tela algodón 180g lote 20u, Confección lote 25 remeras taller LP">
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque 2: Montos -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Monto</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="cantidad">Cantidad</label>
+              <input class="form-control" type="number" id="cantidad" min="0" step="1" placeholder="0">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="precio_unitario">Precio unitario ($)</label>
+              <input class="form-control" type="number" id="precio_unitario" min="0" step="0.01" placeholder="0">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="monto_total">Monto total ($) <span class="req">*</span></label>
+              <input class="form-control" type="number" id="monto_total" min="0" step="0.01"
+                     placeholder="Se calcula automático o ingresá manualmente" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="estado_pago">Estado de pago <span class="req">*</span></label>
+              <select class="form-control" id="estado_pago" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="nro_factura">N° factura / remito</label>
+              <input class="form-control" type="text" id="nro_factura" placeholder="Ej: FA-00123">
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque 3: Factura y notas -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Factura y notas</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="archivo">Foto / PDF de factura</label>
+              <input class="form-control" type="file" id="archivo"
+                     accept="image/*,.pdf" capture="environment"
+                     style="padding:6px">
+              <span style="font-size:.72rem;color:#888;margin-top:2px">
+                Podés sacar foto desde el celular directamente
+              </span>
+            </div>
+
+            <div id="preview-wrap" style="display:none;align-items:center;gap:10px">
+              <img id="preview-img" style="max-height:80px;border-radius:4px;border:1px solid #e8e0d8" alt="preview">
+              <span id="preview-name" style="font-size:.8rem;color:#666"></span>
+            </div>
+
+            <div class="form-group full">
+              <label class="form-label" for="notas">Notas</label>
+              <textarea class="form-control" id="notas" rows="2"
+                        placeholder="Condiciones, observaciones, calidad del material..."></textarea>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+        <a href="/admin/compras/index.html" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary" id="btn-guardar">
+          💾 Guardar compra
+        </button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+
+  renderNav('/admin/compras/nueva.html');
+
+  // Fecha de hoy por defecto
+  document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+
+  // Poblar categorias P&L
+  const sel = document.getElementById('categoria_pl');
+  CATEGORIAS_PL.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    sel.appendChild(opt);
+  });
+
+  // Poblar tipos prenda
+  const selTipo = document.getElementById('tipo_prenda');
+  TIPOS_PRENDA.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    selTipo.appendChild(opt);
+  });
+
+  // Poblar estados de pago
+  const selEstado = document.getElementById('estado_pago');
+  ESTADOS_PAGO.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e; opt.textContent = e;
+    selEstado.appendChild(opt);
+  });
+  selEstado.value = 'Pendiente';
+
+  // Cargar proveedores
+  const { data: provs } = await client.from('proveedores').select('id, nombre').eq('activo', true).order('nombre');
+  const selProv = document.getElementById('proveedor_id');
+  (provs || []).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = p.nombre;
+    selProv.appendChild(opt);
+  });
+}
+
+// Auto-assign codigo_pl
+document.getElementById('categoria_pl').addEventListener('change', function() {
+  document.getElementById('codigo_pl').value = CATEGORIA_A_CODIGO[this.value] || '';
+});
+
+// Auto-calcular monto total
+['cantidad', 'precio_unitario'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const cant  = parseFloat(document.getElementById('cantidad').value) || 0;
+    const precio = parseFloat(document.getElementById('precio_unitario').value) || 0;
+    if (cant > 0 && precio > 0) {
+      document.getElementById('monto_total').value = (cant * precio).toFixed(2);
+    }
+  });
+});
+
+// Preview de imagen
+document.getElementById('archivo').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const wrap = document.getElementById('preview-wrap');
+  const img  = document.getElementById('preview-img');
+  const name = document.getElementById('preview-name');
+  wrap.style.display = 'flex';
+  name.textContent = file.name;
+  if (file.type.startsWith('image/')) {
+    img.src = URL.createObjectURL(file);
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+});
+
+// Guardar
+document.getElementById('form-compra').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    // Determinar nombre del proveedor
+    const provId   = document.getElementById('proveedor_id').value;
+    const provLibre = document.getElementById('proveedor_libre').value.trim();
+    let provNombre = provLibre;
+    if (provId) {
+      const opt = document.querySelector(`#proveedor_id option[value="${provId}"]`);
+      provNombre = opt ? opt.textContent : provLibre;
+    }
+
+    // Subir archivo si hay uno
+    let archivo_url = null;
+    const fileInput = document.getElementById('archivo');
+    if (fileInput.files[0]) {
+      const file = fileInput.files[0];
+      const ext  = file.name.split('.').pop();
+      const path = `${Date.now()}.${ext}`;
+      const { data: upData, error: upErr } = await client.storage
+        .from('facturas')
+        .upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+      const { data: urlData } = client.storage.from('facturas').getPublicUrl(path);
+      archivo_url = urlData.publicUrl;
+    }
+
+    const payload = {
+      fecha:            document.getElementById('fecha').value,
+      proveedor_id:     provId || null,
+      proveedor_nombre: provNombre || null,
+      categoria_pl:     document.getElementById('categoria_pl').value,
+      codigo_pl:        document.getElementById('codigo_pl').value || null,
+      descripcion:      document.getElementById('descripcion').value.trim(),
+      tipo_prenda:      document.getElementById('tipo_prenda').value || null,
+      cantidad:         parseInt(document.getElementById('cantidad').value) || null,
+      precio_unitario:  parseFloat(document.getElementById('precio_unitario').value) || null,
+      monto_total:      parseFloat(document.getElementById('monto_total').value),
+      estado_pago:      document.getElementById('estado_pago').value,
+      nro_factura:      document.getElementById('nro_factura').value.trim() || null,
+      archivo_url,
+      notas:            document.getElementById('notas').value.trim() || null,
+      signo:            '-',
+    };
+
+    const { error } = await client.from('compras').insert(payload);
+    if (error) throw error;
+
+    // Redirigir a lista con mensaje de exito
+    sessionStorage.setItem('toast', 'Compra guardada correctamente');
+    window.location.href = '/admin/compras/index.html';
+
+  } catch (err) {
+    showAlert('Error al guardar: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar compra';
+  }
+});
+
+init();
+</script>
+</body>
+</html>
