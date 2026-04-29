@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos de desarrollo
+Desarrollo/
+*.py
+
+# OS
+.DS_Store
+Thumbs.db

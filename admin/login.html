@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0d0d0d;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      background: #fff;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,.4);
+    }
+    .login-header {
+      background: #0d0d0d;
+      padding: 28px 32px 20px;
+      border-bottom: 3px solid #d4c9b8;
+    }
+    .login-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .04em;
+    }
+    .login-logo span { color: #d4c9b8; }
+    .login-sub {
+      font-size: .72rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-top: 2px;
+    }
+    .login-body { padding: 28px 32px; }
+    .login-title {
+      font-size: .9rem;
+      font-weight: 700;
+      color: #0d0d0d;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .form-label { font-size: .72rem; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .05em; }
+    .form-control {
+      border: 1px solid #d8d0c8;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: .88rem;
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+      transition: border-color .15s;
+    }
+    .form-control:focus { outline: none; border-color: #0d0d0d; }
+    .btn-login {
+      width: 100%;
+      background: #0d0d0d;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 11px;
+      font-size: .9rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-login:hover    { background: #2a2a2a; }
+    .btn-login:disabled { opacity: .5; cursor: not-allowed; }
+    .alert-error {
+      background: #fdecea;
+      color: #c62828;
+      border-left: 3px solid #c62828;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: .82rem;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">ROPA<span>*</span></div>
+      <div class="login-sub">Panel administrativo interno</div>
+    </div>
+    <div class="login-body">
+      <div class="login-title">Ingresar</div>
+      <div class="alert-error" id="error-msg"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-control" type="email" id="email" placeholder="tu@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Contraseña</label>
+          <input class="form-control" type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button class="btn-login" type="submit" id="btn-submit">
+          Ingresar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/admin/js/config.js"></script>
+  <script>
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Si ya hay sesion activa, ir directo al dashboard
+    client.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = "/admin/index.html";
+    });
+
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btn-submit");
+      const err = document.getElementById("error-msg");
+      const email    = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Verificando...';
+      err.style.display = "none";
+
+      const { error } = await client.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        err.textContent = "Email o contraseña incorrectos.";
+        err.style.display = "block";
+        btn.disabled = false;
+        btn.textContent = "Ingresar";
+      } else {
+        window.location.href = "/admin/index.html";
+      }
+    });
+  </script>
+</body>
+</html>
