@@ -10,12 +10,8 @@ function getClient() {
   return _supabase;
 }
 
-// Devuelve true si el usuario es solo lectura
-function esReadOnly(session) {
-  return session?.user?.app_metadata?.role === 'readonly';
-}
-
-// Verifica session. Si no hay, redirige al login.
+// Verifica session activa. Si no hay, redirige al login.
+// Consulta la tabla user_roles para saber si es readonly.
 // Si es readonly y está en una pagina de escritura, redirige al index de esa seccion.
 // Aplica clase CSS 'readonly' al body para ocultar elementos de accion.
 async function requireAuth() {
@@ -26,14 +22,22 @@ async function requireAuth() {
     return null;
   }
 
-  if (esReadOnly(session)) {
+  // Consultar rol desde la base de datos (mas confiable que JWT claims)
+  const { data: roleData } = await client
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', session.user.id)
+    .single();
+
+  const role = roleData?.role || 'readonly';
+
+  if (role === 'readonly') {
     document.body.classList.add('readonly');
 
     // Redirigir fuera de paginas de escritura
     const path = window.location.pathname;
     const esEscritura = path.includes('/nueva.html') || path.includes('/editar.html');
     if (esEscritura) {
-      // Determinar a donde redirigir (seccion/index.html)
       const destino = path.replace(/\/(nueva|editar)\.html.*$/, '/index.html');
       window.location.href = destino;
       return null;
