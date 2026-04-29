@@ -9,192 +9,202 @@
   <link rel="stylesheet" href="/admin/css/admin.css">
 </head>
 <body>
-  <div class="admin-layout">
+<div class="admin-layout">
 
-    <!-- Header -->
-    <header class="admin-header">
-      <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
-      <span class="logo">ROPA<span>*</span></span>
-      <span class="header-title">Panel administrativo</span>
-      <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
-    </header>
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
 
-    <!-- Sidebar -->
-    <nav class="admin-sidebar" id="sidebar">
-      <div class="sidebar-section">
-        <span class="sidebar-label">Principal</span>
-        <a class="sidebar-link active" href="/admin/index.html">
-          <span class="icon">📊</span> Dashboard
-        </a>
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div class="page-title">Dashboard</div>
+    <div class="page-subtitle" id="subtitulo">Cargando...</div>
+
+    <!-- KPIs principales -->
+    <div class="kpi-grid">
+      <div class="kpi-card black">
+        <div class="kpi-label">Ventas del mes</div>
+        <div class="kpi-value" id="kpi-ventas">—</div>
+        <div class="kpi-sub" id="kpi-ventas-sub">— ventas</div>
       </div>
-      <div class="sidebar-section">
-        <span class="sidebar-label">Compras</span>
-        <a class="sidebar-link" href="/admin/compras/nueva.html">
-          <span class="icon">➕</span> Nueva compra
-        </a>
-        <a class="sidebar-link" href="/admin/compras/index.html">
-          <span class="icon">📋</span> Ver todas
-        </a>
+      <div class="kpi-card cream">
+        <div class="kpi-label">Cobrado</div>
+        <div class="kpi-value" id="kpi-cobrado">—</div>
+        <div class="kpi-sub" id="kpi-cobrado-sub">— pendiente</div>
       </div>
-      <div class="sidebar-section">
-        <span class="sidebar-label">Datos</span>
-        <a class="sidebar-link" href="/admin/proveedores/index.html">
-          <span class="icon">🏭</span> Proveedores
-        </a>
+      <div class="kpi-card red">
+        <div class="kpi-label">Gastos del mes</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub" id="kpi-pendientes-sub">— pendiente pago</div>
       </div>
-    </nav>
+      <div class="kpi-card green">
+        <div class="kpi-label">Proveedores activos</div>
+        <div class="kpi-value" id="kpi-proveedores">—</div>
+        <div class="kpi-sub">en el directorio</div>
+      </div>
+    </div>
 
-    <!-- Main -->
-    <main class="admin-main">
-      <div class="page-title">Dashboard</div>
-      <div class="page-subtitle" id="subtitulo">Cargando...</div>
+    <!-- Dos columnas: ultimas ventas + ultimas compras -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
 
-      <!-- KPI cards -->
-      <div class="kpi-grid">
-        <div class="kpi-card black">
-          <div class="kpi-label">Total gastado este mes</div>
-          <div class="kpi-value" id="kpi-total">—</div>
-          <div class="kpi-sub" id="kpi-total-sub">—</div>
+      <!-- Ultimas ventas -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Últimas ventas</span>
+          <a href="/admin/ventas/nueva.html" class="btn btn-primary btn-sm">+ Nueva</a>
         </div>
-        <div class="kpi-card red">
-          <div class="kpi-label">Pendientes de pago</div>
-          <div class="kpi-value" id="kpi-pendientes">—</div>
-          <div class="kpi-sub" id="kpi-pendientes-sub">—</div>
-        </div>
-        <div class="kpi-card cream">
-          <div class="kpi-label">Compras este mes</div>
-          <div class="kpi-value" id="kpi-compras">—</div>
-          <div class="kpi-sub">registros cargados</div>
-        </div>
-        <div class="kpi-card green">
-          <div class="kpi-label">Proveedores activos</div>
-          <div class="kpi-value" id="kpi-proveedores">—</div>
-          <div class="kpi-sub">en el directorio</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Artículo</th><th>Monto</th><th>Cobro</th></tr>
+            </thead>
+            <tbody id="tbody-ventas">
+              <tr><td colspan="4" style="text-align:center;color:#888;padding:20px">Cargando...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <!-- Ultimas compras -->
       <div class="panel">
         <div class="panel-header">
-          <span class="panel-title">Últimas compras registradas</span>
-          <a href="/admin/compras/nueva.html" class="btn btn-primary btn-sm">+ Nueva compra</a>
+          <span class="panel-title">Últimas compras</span>
+          <a href="/admin/compras/nueva.html" class="btn btn-primary btn-sm">+ Nueva</a>
         </div>
         <div class="table-wrap">
-          <table id="tabla-recientes">
+          <table>
             <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Proveedor</th>
-                <th>Descripción</th>
-                <th>Categoría P&L</th>
-                <th>Monto</th>
-                <th>Estado</th>
-              </tr>
+              <tr><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Estado</th></tr>
             </thead>
-            <tbody id="tbody-recientes">
-              <tr><td colspan="6" style="text-align:center;color:#888;padding:20px">Cargando...</td></tr>
+            <tbody id="tbody-compras">
+              <tr><td colspan="4" style="text-align:center;color:#888;padding:20px">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
-    </main>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/admin/js/config.js"></script>
-  <script src="/admin/js/auth.js"></script>
-  <script>
-    const client = getClient();
+    </div>
+  </main>
+</div>
 
-    function pesos(n) {
-      return '$' + Math.round(n).toLocaleString('es-AR');
-    }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
 
-    function badgeEstado(estado) {
-      const map = {
-        'Pagado':       'badge-green',
-        'Pendiente':    'badge-red',
-        'Pago parcial': 'badge-orange',
-      };
-      return `<span class="badge ${map[estado] || 'badge-gray'}">${estado}</span>`;
-    }
+async function loadDashboard() {
+  const session = await requireAuth();
+  if (!session) return;
 
-    async function loadDashboard() {
-      const session = await requireAuth();
-      if (!session) return;
+  renderNav('/admin/index.html');
 
-      // Subtitulo con fecha
-      const now = new Date();
-      const mes = now.toLocaleString('es-AR', { month: 'long', year: 'numeric' });
-      document.getElementById('subtitulo').textContent =
-        'Bienvenido — ' + mes.charAt(0).toUpperCase() + mes.slice(1);
+  // Subtitulo con fecha
+  const now = new Date();
+  const mes = now.toLocaleString('es-AR', { month: 'long', year: 'numeric' });
+  document.getElementById('subtitulo').textContent =
+    'Bienvenido — ' + mes.charAt(0).toUpperCase() + mes.slice(1);
 
-      // Fechas del mes actual
-      const primerDia = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      const hoy       = now.toISOString().split('T')[0];
+  // Rango del mes actual
+  const primerDia = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  const ultimoDia = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
-      // KPI: compras del mes
-      const { data: comprasMes } = await client
-        .from('compras')
-        .select('monto_total, estado_pago')
-        .gte('fecha', primerDia)
-        .lte('fecha', hoy);
+  // KPI ventas del mes
+  const { data: ventasMes } = await client
+    .from('ventas')
+    .select('precio_final, estado_cobro')
+    .gte('fecha', primerDia)
+    .lte('fecha', ultimoDia);
 
-      if (comprasMes) {
-        const total     = comprasMes.reduce((s, r) => s + Number(r.monto_total), 0);
-        const pendMonto = comprasMes
-          .filter(r => r.estado_pago !== 'Pagado')
-          .reduce((s, r) => s + Number(r.monto_total), 0);
-        const pendCount = comprasMes.filter(r => r.estado_pago !== 'Pagado').length;
+  if (ventasMes) {
+    const totalV   = ventasMes.reduce((s, r) => s + Number(r.precio_final), 0);
+    const cobrado  = ventasMes.filter(r => r.estado_cobro === 'Cobrado').reduce((s, r) => s + Number(r.precio_final), 0);
+    const pendV    = totalV - cobrado;
+    document.getElementById('kpi-ventas').textContent     = pesos(totalV);
+    document.getElementById('kpi-ventas-sub').textContent = ventasMes.length + ' ventas';
+    document.getElementById('kpi-cobrado').textContent    = pesos(cobrado);
+    document.getElementById('kpi-cobrado-sub').textContent= pesos(pendV) + ' pendiente';
+  }
 
-        document.getElementById('kpi-total').textContent        = pesos(total);
-        document.getElementById('kpi-total-sub').textContent    = comprasMes.length + ' compras registradas';
-        document.getElementById('kpi-pendientes').textContent   = pesos(pendMonto);
-        document.getElementById('kpi-pendientes-sub').textContent = pendCount + ' compras sin pagar';
-        document.getElementById('kpi-compras').textContent      = comprasMes.length;
-      }
+  // KPI compras del mes
+  const { data: comprasMes } = await client
+    .from('compras')
+    .select('monto_total, estado_pago')
+    .gte('fecha', primerDia)
+    .lte('fecha', ultimoDia);
 
-      // KPI: proveedores
-      const { count } = await client
-        .from('proveedores')
-        .select('*', { count: 'exact', head: true })
-        .eq('activo', true);
-      document.getElementById('kpi-proveedores').textContent = count ?? 0;
+  if (comprasMes) {
+    const totalC  = comprasMes.reduce((s, r) => s + Number(r.monto_total), 0);
+    const pendC   = comprasMes.filter(r => r.estado_pago !== 'Pagado').reduce((s, r) => s + Number(r.monto_total), 0);
+    document.getElementById('kpi-total').textContent          = pesos(totalC);
+    document.getElementById('kpi-pendientes-sub').textContent = pesos(pendC) + ' pendiente pago';
+  }
 
-      // Ultimas 8 compras
-      const { data: recientes } = await client
-        .from('compras')
-        .select('fecha, proveedor_nombre, descripcion, categoria_pl, monto_total, estado_pago, id')
-        .order('created_at', { ascending: false })
-        .limit(8);
+  // KPI proveedores
+  const { count } = await client
+    .from('proveedores')
+    .select('*', { count: 'exact', head: true })
+    .eq('activo', true);
+  document.getElementById('kpi-proveedores').textContent = count ?? 0;
 
-      const tbody = document.getElementById('tbody-recientes');
-      if (!recientes || recientes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:24px">No hay compras registradas aún. <a href="/admin/compras/nueva.html" style="color:#0d0d0d;font-weight:600">Cargar primera compra →</a></td></tr>';
-        return;
-      }
+  // Ultimas 6 ventas
+  const { data: ventas } = await client
+    .from('ventas')
+    .select('fecha, articulo, precio_final, estado_cobro, id')
+    .order('fecha', { ascending: false })
+    .limit(6);
 
-      tbody.innerHTML = recientes.map(r => `
-        <tr style="cursor:pointer" onclick="window.location='/admin/compras/editar.html?id=${r.id}'">
-          <td>${new Date(r.fecha + 'T00:00:00').toLocaleDateString('es-AR')}</td>
-          <td>${r.proveedor_nombre || '—'}</td>
-          <td>${r.descripcion}</td>
-          <td><span style="font-size:.78rem;color:#666">${r.categoria_pl}</span></td>
-          <td style="font-weight:600">${pesos(r.monto_total)}</td>
-          <td>${badgeEstado(r.estado_pago)}</td>
-        </tr>
-      `).join('');
-    }
+  const tbodyV = document.getElementById('tbody-ventas');
+  if (!ventas || ventas.length === 0) {
+    tbodyV.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#888;padding:20px">
+      Sin ventas. <a href="/admin/ventas/nueva.html" style="color:#0d0d0d;font-weight:600">Registrar primera →</a>
+    </td></tr>`;
+  } else {
+    tbodyV.innerHTML = ventas.map(r => `
+      <tr style="cursor:pointer" onclick="window.location='/admin/ventas/editar.html?id=${r.id}'">
+        <td style="white-space:nowrap">${fechaCorta(r.fecha)}</td>
+        <td>${r.articulo}</td>
+        <td style="font-weight:600;white-space:nowrap">${pesos(r.precio_final)}</td>
+        <td>${badgeCobro(r.estado_cobro)}</td>
+      </tr>
+    `).join('');
+  }
 
-    loadDashboard();
+  // Ultimas 6 compras
+  const { data: compras } = await client
+    .from('compras')
+    .select('fecha, descripcion, monto_total, estado_pago, id')
+    .order('fecha', { ascending: false })
+    .limit(6);
 
-    // Responsive menu toggle
-    const btnMenu = document.getElementById('btn-menu');
-    const sidebar = document.getElementById('sidebar');
-    if (window.innerWidth <= 768) {
-      btnMenu.style.display = 'block';
-      btnMenu.addEventListener('click', () => sidebar.classList.toggle('open'));
-    }
-  </script>
+  const tbodyC = document.getElementById('tbody-compras');
+  if (!compras || compras.length === 0) {
+    tbodyC.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#888;padding:20px">
+      Sin compras. <a href="/admin/compras/nueva.html" style="color:#0d0d0d;font-weight:600">Cargar primera →</a>
+    </td></tr>`;
+  } else {
+    tbodyC.innerHTML = compras.map(r => `
+      <tr style="cursor:pointer" onclick="window.location='/admin/compras/editar.html?id=${r.id}'">
+        <td style="white-space:nowrap">${fechaCorta(r.fecha)}</td>
+        <td>${r.descripcion}</td>
+        <td style="font-weight:600;white-space:nowrap">${pesos(r.monto_total)}</td>
+        <td>${badgeEstado(r.estado_pago)}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+function badgeCobro(estado) {
+  const map = { 'Cobrado': 'badge-green', 'Pendiente': 'badge-red', 'Cobro parcial': 'badge-orange' };
+  return `<span class="badge ${map[estado] || 'badge-gray'}">${estado || '—'}</span>`;
+}
+
+loadDashboard();
+</script>
 </body>
 </html>

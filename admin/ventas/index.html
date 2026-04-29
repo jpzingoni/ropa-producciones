@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ventas — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div>
+        <div class="page-title">Ventas</div>
+        <div class="page-subtitle">Historial de ventas realizadas</div>
+      </div>
+      <a href="/admin/ventas/nueva.html" class="btn btn-primary">+ Nueva venta</a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" style="margin-bottom:20px">
+      <div class="kpi-card black">
+        <div class="kpi-label">Total vendido</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub" id="kpi-count">— ventas</div>
+      </div>
+      <div class="kpi-card cream">
+        <div class="kpi-label">Cobrado</div>
+        <div class="kpi-value" id="kpi-cobrado">—</div>
+        <div class="kpi-sub" id="kpi-cobrado-count">— ventas cobradas</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">Pendiente de cobro</div>
+        <div class="kpi-value" id="kpi-pendiente">—</div>
+        <div class="kpi-sub" id="kpi-pend-count">— sin cobrar</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="panel">
+      <div class="panel-body" style="padding:14px 18px">
+        <div class="filters">
+          <div class="form-group">
+            <label class="form-label">Mes</label>
+            <input class="form-control" type="month" id="f-mes" style="width:160px">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Canal</label>
+            <select class="form-control" id="f-canal" style="width:150px">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estado cobro</label>
+            <select class="form-control" id="f-cobro" style="width:160px">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Buscar</label>
+            <input class="form-control" type="text" id="f-buscar"
+                   placeholder="Cliente, artículo..." style="width:200px">
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <button class="btn btn-primary" onclick="cargarVentas()">Filtrar</button>
+            <button class="btn btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
+            <button class="btn btn-secondary" onclick="exportarExcel()">⬇ Excel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Artículo</th>
+              <th>Canal</th>
+              <th>Precio final</th>
+              <th>Cobro</th>
+              <th>Envío</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="sin-resultados" style="display:none;text-align:center;padding:32px;color:#888">
+        No hay ventas que coincidan con los filtros
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+let _data = [];
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/ventas/index.html');
+
+  // Mes actual por defecto
+  const now = new Date();
+  document.getElementById('f-mes').value =
+    now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
+  // Poblar filtros
+  poblarSelect('f-canal', CANALES_VENTA);
+  poblarSelect('f-cobro', ESTADOS_COBRO);
+
+  // Toast
+  const toast = sessionStorage.getItem('toast');
+  if (toast) { showAlert(toast, 'success'); sessionStorage.removeItem('toast'); }
+
+  await cargarVentas();
+}
+
+function poblarSelect(id, arr) {
+  const sel = document.getElementById(id);
+  arr.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+async function cargarVentas() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#888">Cargando...</td></tr>';
+
+  let q = client.from('ventas').select('*').order('fecha', { ascending: false });
+
+  const mes = document.getElementById('f-mes').value;
+  if (mes) {
+    const [y, m] = mes.split('-');
+    q = q.gte('fecha', `${y}-${m}-01`)
+         .lte('fecha', new Date(y, m, 0).toISOString().split('T')[0]);
+  }
+
+  const canal = document.getElementById('f-canal').value;
+  if (canal) q = q.eq('canal', canal);
+
+  const cobro = document.getElementById('f-cobro').value;
+  if (cobro) q = q.eq('estado_cobro', cobro);
+
+  const { data, error } = await q.limit(500);
+  if (error) { showAlert('Error al cargar: ' + error.message); return; }
+
+  const buscar = document.getElementById('f-buscar').value.toLowerCase().trim();
+  _data = (data || []).filter(r => {
+    if (!buscar) return true;
+    return (r.articulo || '').toLowerCase().includes(buscar)
+        || (r.cliente_nombre || '').toLowerCase().includes(buscar)
+        || (r.cliente_contacto || '').toLowerCase().includes(buscar)
+        || (r.notas || '').toLowerCase().includes(buscar);
+  });
+
+  renderTabla(_data);
+  actualizarKPIs(_data);
+}
+
+function renderTabla(rows) {
+  const tbody = document.getElementById('tbody');
+  const sin   = document.getElementById('sin-resultados');
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    sin.style.display = 'block';
+    return;
+  }
+  sin.style.display = 'none';
+
+  tbody.innerHTML = rows.map(r => `
+    <tr style="cursor:pointer" onclick="window.location='/admin/ventas/editar.html?id=${r.id}'">
+      <td style="white-space:nowrap">${fechaCorta(r.fecha)}</td>
+      <td>
+        ${r.cliente_nombre ? `<strong>${r.cliente_nombre}</strong>` : '<span style="color:#aaa">—</span>'}
+        ${r.cliente_contacto ? `<br><span style="font-size:.72rem;color:#888">${r.cliente_contacto}</span>` : ''}
+      </td>
+      <td>
+        ${r.articulo}
+        ${r.talle ? `<br><span style="font-size:.72rem;color:#888">Talle ${r.talle}${r.color ? ' · ' + r.color : ''}</span>` : ''}
+      </td>
+      <td><span style="font-size:.78rem;color:#666">${r.canal || '—'}</span></td>
+      <td style="font-weight:600;white-space:nowrap">${pesos(r.precio_final)}</td>
+      <td>${badgeCobro(r.estado_cobro)}</td>
+      <td>${badgeEnvio(r.estado_envio)}</td>
+      <td style="font-size:.75rem;color:#aaa">✏</td>
+    </tr>
+  `).join('');
+}
+
+function actualizarKPIs(rows) {
+  const total    = rows.reduce((s, r) => s + Number(r.precio_final), 0);
+  const cobRows  = rows.filter(r => r.estado_cobro === 'Cobrado');
+  const cobrado  = cobRows.reduce((s, r) => s + Number(r.precio_final), 0);
+  const pendRows = rows.filter(r => r.estado_cobro !== 'Cobrado');
+  const pend     = pendRows.reduce((s, r) => s + Number(r.precio_final), 0);
+
+  document.getElementById('kpi-total').textContent        = pesos(total);
+  document.getElementById('kpi-count').textContent        = rows.length + ' ventas';
+  document.getElementById('kpi-cobrado').textContent      = pesos(cobrado);
+  document.getElementById('kpi-cobrado-count').textContent= cobRows.length + ' ventas cobradas';
+  document.getElementById('kpi-pendiente').textContent    = pesos(pend);
+  document.getElementById('kpi-pend-count').textContent   = pendRows.length + ' sin cobrar';
+}
+
+function badgeCobro(estado) {
+  const map = {
+    'Cobrado':       'badge-green',
+    'Pendiente':     'badge-red',
+    'Cobro parcial': 'badge-orange',
+  };
+  return `<span class="badge ${map[estado] || 'badge-gray'}">${estado || '—'}</span>`;
+}
+
+function badgeEnvio(estado) {
+  const map = {
+    'Sin envio':      'badge-gray',
+    'Pendiente envio':'badge-orange',
+    'En camino':      'badge-blue',
+    'Entregado':      'badge-green',
+  };
+  return `<span class="badge ${map[estado] || 'badge-gray'}">${estado || '—'}</span>`;
+}
+
+function limpiarFiltros() {
+  const now = new Date();
+  document.getElementById('f-mes').value =
+    now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  document.getElementById('f-canal').value  = '';
+  document.getElementById('f-cobro').value  = '';
+  document.getElementById('f-buscar').value = '';
+  cargarVentas();
+}
+
+function exportarExcel() {
+  if (!_data.length) { showAlert('No hay datos para exportar', 'error'); return; }
+  const rows = _data.map(r => ({
+    'Fecha':            r.fecha,
+    'Canal':            r.canal,
+    'Cliente':          r.cliente_nombre || '',
+    'Contacto':         r.cliente_contacto || '',
+    'Articulo':         r.articulo,
+    'Tipo':             r.tipo_prenda || '',
+    'Talle':            r.talle || '',
+    'Color':            r.color || '',
+    'Precio lista':     r.precio_venta,
+    'Descuento':        r.descuento || 0,
+    'Precio final':     r.precio_final,
+    'Estado cobro':     r.estado_cobro,
+    'Medio pago':       r.medio_pago || '',
+    'Estado envio':     r.estado_envio,
+    'Notas':            r.notas || '',
+  }));
+  const ws  = XLSX.utils.json_to_sheet(rows);
+  const wb  = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Ventas');
+  const mes = document.getElementById('f-mes').value || 'todos';
+  XLSX.writeFile(wb, `ROPA_Ventas_${mes}.xlsx`);
+}
+
+// Debounce search
+let debTimer;
+document.getElementById('f-buscar').addEventListener('input', () => {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(cargarVentas, 350);
+});
+
+init();
+</script>
+</body>
+</html>

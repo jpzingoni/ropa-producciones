@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar venta — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <a href="/admin/ventas/index.html" class="btn btn-secondary btn-sm">← Volver</a>
+      <div>
+        <div class="page-title">Editar venta</div>
+        <div class="page-subtitle" id="subtitulo">Cargando...</div>
+      </div>
+    </div>
+
+    <form id="form-venta" style="opacity:0;transition:opacity .2s">
+
+      <!-- Datos del cliente y canal -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Cliente y canal</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="fecha">Fecha <span class="req">*</span></label>
+              <input class="form-control" type="date" id="fecha" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="canal">Canal de venta <span class="req">*</span></label>
+              <select class="form-control" id="canal" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cliente_nombre">Nombre / alias</label>
+              <input class="form-control" type="text" id="cliente_nombre">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cliente_contacto">Contacto</label>
+              <input class="form-control" type="text" id="cliente_contacto">
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Articulo -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Artículo</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group full">
+              <label class="form-label" for="articulo">Artículo <span class="req">*</span></label>
+              <input class="form-control" type="text" id="articulo" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="tipo_prenda">Tipo de prenda</label>
+              <select class="form-control" id="tipo_prenda">
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="talle">Talle</label>
+              <select class="form-control" id="talle">
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="color">Color / variante</label>
+              <input class="form-control" type="text" id="color">
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Monto y cobro -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Precio y cobro</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="precio_venta">Precio de lista ($) <span class="req">*</span></label>
+              <input class="form-control" type="number" id="precio_venta" min="0" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="descuento">Descuento ($)</label>
+              <input class="form-control" type="number" id="descuento" min="0" step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="precio_final">Precio final ($) <span class="req">*</span></label>
+              <input class="form-control" type="number" id="precio_final" min="0" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="estado_cobro">Estado de cobro <span class="req">*</span></label>
+              <select class="form-control" id="estado_cobro" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="medio_pago">Medio de pago</label>
+              <select class="form-control" id="medio_pago">
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Envio y notas -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Envío y notas</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="estado_envio">Estado de envío <span class="req">*</span></label>
+              <select class="form-control" id="estado_envio" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label class="form-label" for="notas">Notas</label>
+              <textarea class="form-control" id="notas" rows="2"></textarea>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div style="display:flex;gap:10px;justify-content:space-between;margin-top:4px">
+        <button type="button" class="btn btn-danger" id="btn-eliminar">
+          🗑 Eliminar venta
+        </button>
+        <div style="display:flex;gap:10px">
+          <a href="/admin/ventas/index.html" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary" id="btn-guardar">
+            💾 Guardar cambios
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+const id = new URLSearchParams(window.location.search).get('id');
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/ventas/index.html');
+
+  if (!id) { window.location.href = '/admin/ventas/index.html'; return; }
+
+  poblarSelect('canal',        CANALES_VENTA);
+  poblarSelect('tipo_prenda',  TIPOS_PRENDA);
+  poblarSelect('talle',        TALLES);
+  poblarSelect('estado_cobro', ESTADOS_COBRO);
+  poblarSelect('medio_pago',   MEDIOS_PAGO);
+  poblarSelect('estado_envio', ESTADOS_ENVIO);
+
+  const { data, error } = await client.from('ventas').select('*').eq('id', id).single();
+  if (error || !data) { showAlert('Venta no encontrada'); return; }
+
+  document.getElementById('subtitulo').textContent = data.articulo;
+  rellenarForm(data);
+  document.getElementById('form-venta').style.opacity = '1';
+}
+
+function poblarSelect(id, arr) {
+  const sel = document.getElementById(id);
+  arr.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+function rellenarForm(d) {
+  document.getElementById('fecha').value            = d.fecha || '';
+  document.getElementById('canal').value            = d.canal || '';
+  document.getElementById('cliente_nombre').value   = d.cliente_nombre || '';
+  document.getElementById('cliente_contacto').value = d.cliente_contacto || '';
+  document.getElementById('articulo').value         = d.articulo || '';
+  document.getElementById('tipo_prenda').value      = d.tipo_prenda || '';
+  document.getElementById('talle').value            = d.talle || '';
+  document.getElementById('color').value            = d.color || '';
+  document.getElementById('precio_venta').value     = d.precio_venta || '';
+  document.getElementById('descuento').value        = d.descuento || '';
+  document.getElementById('precio_final').value     = d.precio_final || '';
+  document.getElementById('estado_cobro').value     = d.estado_cobro || '';
+  document.getElementById('medio_pago').value       = d.medio_pago || '';
+  document.getElementById('estado_envio').value     = d.estado_envio || '';
+  document.getElementById('notas').value            = d.notas || '';
+}
+
+// Auto-calcular precio final
+['precio_venta', 'descuento'].forEach(fieldId => {
+  document.getElementById(fieldId).addEventListener('input', () => {
+    const lista = parseFloat(document.getElementById('precio_venta').value) || 0;
+    const dto   = parseFloat(document.getElementById('descuento').value) || 0;
+    if (lista > 0) {
+      document.getElementById('precio_final').value = Math.max(0, lista - dto).toFixed(2);
+    }
+  });
+});
+
+// Guardar cambios
+document.getElementById('form-venta').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    const payload = {
+      fecha:            document.getElementById('fecha').value,
+      canal:            document.getElementById('canal').value,
+      cliente_nombre:   document.getElementById('cliente_nombre').value.trim() || null,
+      cliente_contacto: document.getElementById('cliente_contacto').value.trim() || null,
+      articulo:         document.getElementById('articulo').value.trim(),
+      tipo_prenda:      document.getElementById('tipo_prenda').value || null,
+      talle:            document.getElementById('talle').value || null,
+      color:            document.getElementById('color').value.trim() || null,
+      precio_venta:     parseFloat(document.getElementById('precio_venta').value),
+      descuento:        parseFloat(document.getElementById('descuento').value) || 0,
+      precio_final:     parseFloat(document.getElementById('precio_final').value),
+      estado_cobro:     document.getElementById('estado_cobro').value,
+      medio_pago:       document.getElementById('medio_pago').value || null,
+      estado_envio:     document.getElementById('estado_envio').value,
+      notas:            document.getElementById('notas').value.trim() || null,
+      updated_at:       new Date().toISOString(),
+    };
+
+    const { error } = await client.from('ventas').update(payload).eq('id', id);
+    if (error) throw error;
+
+    sessionStorage.setItem('toast', 'Venta actualizada correctamente');
+    window.location.href = '/admin/ventas/index.html';
+
+  } catch (err) {
+    showAlert('Error al guardar: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar cambios';
+  }
+});
+
+// Eliminar
+document.getElementById('btn-eliminar').addEventListener('click', async () => {
+  if (!confirm('¿Eliminar esta venta? Esta acción no se puede deshacer.')) return;
+  const { error } = await client.from('ventas').delete().eq('id', id);
+  if (error) { showAlert('Error al eliminar: ' + error.message); return; }
+  sessionStorage.setItem('toast', 'Venta eliminada');
+  window.location.href = '/admin/ventas/index.html';
+});
+
+init();
+</script>
+</body>
+</html>

@@ -4,10 +4,12 @@
 function renderNav(activeLink) {
   const links = [
     { href: "/admin/index.html",             icon: "📊", label: "Dashboard",    group: "Principal" },
+    { href: "/admin/ventas/nueva.html",       icon: "➕", label: "Nueva venta",  group: "Ventas" },
+    { href: "/admin/ventas/index.html",      icon: "🛍", label: "Ver todas",    group: "Ventas" },
     { href: "/admin/compras/nueva.html",     icon: "➕", label: "Nueva compra", group: "Compras" },
     { href: "/admin/compras/index.html",     icon: "📋", label: "Ver todas",    group: "Compras" },
     { href: "/admin/proveedores/index.html", icon: "🏭", label: "Proveedores",  group: "Datos" },
-    { href: "/admin/resumen.html",          icon: "📈", label: "Resumen",       group: "Datos" },
+    { href: "/admin/resumen.html",           icon: "📈", label: "Resumen",      group: "Datos" },
   ];
 
   // Agrupar

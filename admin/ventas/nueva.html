@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nueva venta — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <a href="/admin/ventas/index.html" class="btn btn-secondary btn-sm">← Volver</a>
+      <div>
+        <div class="page-title">Nueva venta</div>
+        <div class="page-subtitle">Registrá una venta realizada</div>
+      </div>
+    </div>
+
+    <form id="form-venta">
+
+      <!-- Datos del cliente y canal -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Cliente y canal</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="fecha">Fecha <span class="req">*</span></label>
+              <input class="form-control" type="date" id="fecha" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="canal">Canal de venta <span class="req">*</span></label>
+              <select class="form-control" id="canal" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cliente_nombre">Nombre / alias</label>
+              <input class="form-control" type="text" id="cliente_nombre" placeholder="Ej: María González, @usuaria_ig">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cliente_contacto">Contacto</label>
+              <input class="form-control" type="text" id="cliente_contacto" placeholder="@ig, WhatsApp, email...">
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Articulo -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Artículo</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group full">
+              <label class="form-label" for="articulo">Artículo <span class="req">*</span></label>
+              <input class="form-control" type="text" id="articulo" required
+                     placeholder="Ej: Remera RÍO MANSO, Top EL BOLSÓN rosas negras">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="tipo_prenda">Tipo de prenda</label>
+              <select class="form-control" id="tipo_prenda">
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="talle">Talle</label>
+              <select class="form-control" id="talle">
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="color">Color / variante</label>
+              <input class="form-control" type="text" id="color" placeholder="Ej: blanca, sand, negra">
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Monto y cobro -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Precio y cobro</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="precio_venta">Precio de lista ($) <span class="req">*</span></label>
+              <input class="form-control" type="number" id="precio_venta" min="0" step="0.01"
+                     placeholder="10000" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="descuento">Descuento ($)</label>
+              <input class="form-control" type="number" id="descuento" min="0" step="0.01" placeholder="0">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="precio_final">Precio final ($) <span class="req">*</span></label>
+              <input class="form-control" type="number" id="precio_final" min="0" step="0.01"
+                     placeholder="Se calcula automático" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="estado_cobro">Estado de cobro <span class="req">*</span></label>
+              <select class="form-control" id="estado_cobro" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="medio_pago">Medio de pago</label>
+              <select class="form-control" id="medio_pago">
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Envio y notas -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Envío y notas</span></div>
+        <div class="panel-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label" for="estado_envio">Estado de envío <span class="req">*</span></label>
+              <select class="form-control" id="estado_envio" required>
+                <option value="">— Seleccioná —</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label class="form-label" for="notas">Notas</label>
+              <textarea class="form-control" id="notas" rows="2"
+                        placeholder="Dirección de envío, aclaraciones, condiciones..."></textarea>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+        <a href="/admin/ventas/index.html" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary" id="btn-guardar">
+          💾 Guardar venta
+        </button>
+      </div>
+
+    </form>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/ventas/nueva.html');
+
+  // Fecha de hoy por defecto
+  document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+
+  // Poblar selects desde config.js
+  poblarSelect('canal',        CANALES_VENTA);
+  poblarSelect('tipo_prenda',  TIPOS_PRENDA);
+  poblarSelect('talle',        TALLES);
+  poblarSelect('estado_cobro', ESTADOS_COBRO);
+  poblarSelect('medio_pago',   MEDIOS_PAGO);
+  poblarSelect('estado_envio', ESTADOS_ENVIO);
+
+  // Defaults
+  document.getElementById('estado_cobro').value = 'Pendiente';
+  document.getElementById('estado_envio').value = 'Sin envio';
+}
+
+function poblarSelect(id, arr) {
+  const sel = document.getElementById(id);
+  arr.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+// Auto-calcular precio final
+['precio_venta', 'descuento'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const lista = parseFloat(document.getElementById('precio_venta').value) || 0;
+    const dto   = parseFloat(document.getElementById('descuento').value) || 0;
+    if (lista > 0) {
+      document.getElementById('precio_final').value = Math.max(0, lista - dto).toFixed(2);
+    }
+  });
+});
+
+// Guardar
+document.getElementById('form-venta').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    const payload = {
+      fecha:            document.getElementById('fecha').value,
+      canal:            document.getElementById('canal').value,
+      cliente_nombre:   document.getElementById('cliente_nombre').value.trim() || null,
+      cliente_contacto: document.getElementById('cliente_contacto').value.trim() || null,
+      articulo:         document.getElementById('articulo').value.trim(),
+      tipo_prenda:      document.getElementById('tipo_prenda').value || null,
+      talle:            document.getElementById('talle').value || null,
+      color:            document.getElementById('color').value.trim() || null,
+      precio_venta:     parseFloat(document.getElementById('precio_venta').value),
+      descuento:        parseFloat(document.getElementById('descuento').value) || 0,
+      precio_final:     parseFloat(document.getElementById('precio_final').value),
+      estado_cobro:     document.getElementById('estado_cobro').value,
+      medio_pago:       document.getElementById('medio_pago').value || null,
+      estado_envio:     document.getElementById('estado_envio').value,
+      notas:            document.getElementById('notas').value.trim() || null,
+    };
+
+    const { error } = await client.from('ventas').insert(payload);
+    if (error) throw error;
+
+    sessionStorage.setItem('toast', 'Venta registrada correctamente');
+    window.location.href = '/admin/ventas/index.html';
+
+  } catch (err) {
+    showAlert('Error al guardar: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar venta';
+  }
+});
+
+init();
+</script>
+</body>
+</html>
