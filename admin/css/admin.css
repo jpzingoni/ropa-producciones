@@ -298,3 +298,10 @@ tbody tr:nth-child(even):hover { background: var(--cream-l); }
 @media (max-width: 480px) {
   .kpi-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ── Modo solo lectura ────────────────────────────────────────────────────── */
+/* Los elementos con data-admin se ocultan cuando el body tiene clase .readonly */
+body.readonly [data-admin] {
+  display: none !important;
+}
