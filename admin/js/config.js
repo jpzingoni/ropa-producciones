@@ -29,7 +29,7 @@ const ESTADOS_PAGO = ["Pagado", "Pendiente", "Pago parcial"];
 
 // ── Ventas ─────────────────────────────────────────────────────────────────
 const CANALES_VENTA  = ["Instagram", "WhatsApp", "Presencial", "Otro"];
-const TALLES         = ["XS", "S", "M", "L", "XL", "Unico"];
+const TALLES         = ["S", "M", "L", "XL"];
 const ESTADOS_COBRO  = ["Cobrado", "Pendiente", "Cobro parcial"];
 const MEDIOS_PAGO    = ["Transferencia", "Efectivo", "Mercado Pago", "Otro"];
 const ESTADOS_ENVIO  = ["Sin envio", "Pendiente envio", "En camino", "Entregado"];

@@ -236,6 +236,7 @@ document.getElementById('articulo_id').addEventListener('change', function() {
   if (!art) return;
   document.getElementById('articulo').value     = art.nombre;
   document.getElementById('tipo_prenda').value  = art.tipo || '';
+  document.getElementById('talle').value        = art.talle || '';
   if (art.precio_venta) {
     document.getElementById('precio_venta').value  = art.precio_venta;
     document.getElementById('precio_final').value  = art.precio_venta;

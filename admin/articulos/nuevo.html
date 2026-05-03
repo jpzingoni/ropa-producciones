@@ -57,6 +57,13 @@
                      placeholder="Ej: Remera RÍO MANSO, Top EL BOLSÓN">
             </div>
 
+            <div class="form-group">
+              <label class="form-label" for="talle">Talle</label>
+              <select class="form-control" id="talle">
+                <option value="">— Sin talle —</option>
+              </select>
+            </div>
+
             <div class="form-group full">
               <label class="form-label" for="descripcion">Descripción</label>
               <input class="form-control" type="text" id="descripcion"
@@ -122,6 +129,13 @@ async function init() {
     opt.value = t; opt.textContent = t;
     selTipo.appendChild(opt);
   });
+
+  const selTalle = document.getElementById('talle');
+  TALLES.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    selTalle.appendChild(opt);
+  });
 }
 
 document.getElementById('form-art').addEventListener('submit', async (e) => {
@@ -144,6 +158,7 @@ document.getElementById('form-art').addEventListener('submit', async (e) => {
       codigo,
       nombre,
       tipo:         document.getElementById('tipo').value || null,
+      talle:        document.getElementById('talle').value || null,
       descripcion:  document.getElementById('descripcion').value.trim() || null,
       precio_venta: parseFloat(document.getElementById('precio_venta').value) || null,
       precio_costo: parseFloat(document.getElementById('precio_costo').value) || null,
