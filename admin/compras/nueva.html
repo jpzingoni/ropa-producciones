@@ -25,6 +25,23 @@
     <div class="page-subtitle">Registrá un gasto a proveedor o insumo de producción</div>
 
     <form id="form-compra">
+
+      <!-- Selector de articulo -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Artículo del catálogo</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label" for="articulo_id">Seleccionar artículo</label>
+            <select class="form-control" id="articulo_id" style="max-width:400px">
+              <option value="">— Elegir del catálogo (opcional) —</option>
+            </select>
+            <span style="font-size:.72rem;color:#888;margin-top:4px;display:block">
+              Al seleccionar un artículo se completan automáticamente descripción y tipo.
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- Bloque 1: Datos principales -->
       <div class="panel">
         <div class="panel-header"><span class="panel-title">Datos principales</span></div>
@@ -208,7 +225,30 @@ async function init() {
     opt.value = p.id; opt.textContent = p.nombre;
     selProv.appendChild(opt);
   });
+
+  // Cargar articulos del catalogo
+  const { data: arts } = await client.from('articulos').select('*').eq('activo', true).order('nombre');
+  const selArt = document.getElementById('articulo_id');
+  window._articulosCompra = {};
+  (arts || []).forEach(a => {
+    window._articulosCompra[a.id] = a;
+    const opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = `${a.codigo ? '[' + a.codigo + '] ' : ''}${a.nombre}${a.tipo ? ' — ' + a.tipo : ''}`;
+    selArt.appendChild(opt);
+  });
 }
+
+// Autocompletar al elegir articulo
+document.getElementById('articulo_id').addEventListener('change', function() {
+  const art = window._articulosCompra?.[this.value];
+  if (!art) return;
+  document.getElementById('descripcion').value  = art.nombre;
+  document.getElementById('tipo_prenda').value  = art.tipo || '';
+  if (art.precio_costo) {
+    document.getElementById('precio_unitario').value = art.precio_costo;
+  }
+});
 
 // Auto-assign codigo_pl
 document.getElementById('categoria_pl').addEventListener('change', function() {
@@ -291,6 +331,7 @@ document.getElementById('form-compra').addEventListener('submit', async (e) => {
       archivo_url,
       notas:            document.getElementById('notas').value.trim() || null,
       signo:            '-',
+      articulo_id:      document.getElementById('articulo_id').value || null,
     };
 
     const { error } = await client.from('compras').insert(payload);

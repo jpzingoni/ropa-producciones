@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artículos — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <style>
+    .art-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .art-card {
+      background: #fff;
+      border: 1px solid #e8e0d8;
+      border-radius: 6px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: box-shadow .15s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .art-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.1); }
+    .art-card.inactivo { opacity: .5; }
+    .art-codigo {
+      font-size: .72rem; font-weight: 700; letter-spacing: 1px;
+      color: #888; text-transform: uppercase;
+    }
+    .art-nombre { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+    .art-tipo   { font-size: .78rem; color: #666; }
+    .art-precios {
+      display: flex; gap: 16px; margin-top: 6px;
+      padding-top: 10px; border-top: 1px solid #f0ebe3;
+    }
+    .art-precio-item { font-size: .8rem; }
+    .art-precio-item strong { display: block; font-size: .95rem; }
+    .art-precio-label { color: #888; font-size: .72rem; }
+    .badge-inactivo {
+      display: inline-block; background: #f5f5f5; color: #999;
+      font-size: .68rem; font-weight: 700; padding: 2px 7px;
+      border-radius: 10px; letter-spacing: .5px; text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div>
+        <div class="page-title">Artículos</div>
+        <div class="page-subtitle">Maestro de productos para ventas y compras</div>
+      </div>
+      <a href="/admin/articulos/nuevo.html" class="btn btn-primary">+ Nuevo artículo</a>
+    </div>
+
+    <!-- Filtros -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <input class="form-control" type="text" id="f-buscar"
+             placeholder="Buscar por nombre o código..." style="max-width:260px">
+      <select class="form-control" id="f-tipo" style="max-width:180px">
+        <option value="">Todos los tipos</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
+        <input type="checkbox" id="f-inactivos"> Mostrar inactivos
+      </label>
+    </div>
+
+    <!-- Grid -->
+    <div class="art-grid" id="art-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:32px;color:#888">Cargando...</div>
+    </div>
+    <div id="sin-resultados" style="display:none;text-align:center;padding:40px;color:#888">
+      No hay artículos que coincidan
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+let _todos = [];
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/articulos/index.html');
+
+  // Poblar filtro de tipos
+  const selTipo = document.getElementById('f-tipo');
+  TIPOS_PRENDA.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    selTipo.appendChild(opt);
+  });
+
+  const toast = sessionStorage.getItem('toast');
+  if (toast) { showAlert(toast, 'success'); sessionStorage.removeItem('toast'); }
+
+  await cargarArticulos();
+}
+
+async function cargarArticulos() {
+  const { data, error } = await client
+    .from('articulos')
+    .select('*')
+    .order('nombre');
+
+  if (error) { showAlert('Error al cargar: ' + error.message); return; }
+  _todos = data || [];
+  filtrar();
+}
+
+function filtrar() {
+  const buscar   = document.getElementById('f-buscar').value.toLowerCase().trim();
+  const tipo     = document.getElementById('f-tipo').value;
+  const inactivos= document.getElementById('f-inactivos').checked;
+
+  const filtrados = _todos.filter(a => {
+    if (!inactivos && !a.activo) return false;
+    if (tipo && a.tipo !== tipo) return false;
+    if (buscar) {
+      return (a.nombre || '').toLowerCase().includes(buscar)
+          || (a.codigo || '').toLowerCase().includes(buscar)
+          || (a.descripcion || '').toLowerCase().includes(buscar);
+    }
+    return true;
+  });
+
+  renderGrid(filtrados);
+}
+
+function renderGrid(items) {
+  const grid = document.getElementById('art-grid');
+  const sin  = document.getElementById('sin-resultados');
+
+  if (!items.length) {
+    grid.innerHTML = '';
+    sin.style.display = 'block';
+    return;
+  }
+  sin.style.display = 'none';
+
+  grid.innerHTML = items.map(a => `
+    <a class="art-card ${a.activo ? '' : 'inactivo'}"
+       href="/admin/articulos/editar.html?id=${a.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="art-codigo">${a.codigo || '—'}</div>
+        ${!a.activo ? '<span class="badge-inactivo">Inactivo</span>' : ''}
+      </div>
+      <div class="art-nombre">${a.nombre}</div>
+      <div class="art-tipo">${a.tipo || ''}</div>
+      ${a.descripcion ? `<div style="font-size:.78rem;color:#888;margin-top:2px">${a.descripcion}</div>` : ''}
+      <div class="art-precios">
+        <div class="art-precio-item">
+          <span class="art-precio-label">Precio venta</span>
+          <strong>${a.precio_venta != null ? pesos(a.precio_venta) : '—'}</strong>
+        </div>
+        <div class="art-precio-item">
+          <span class="art-precio-label">Precio costo</span>
+          <strong>${a.precio_costo != null ? pesos(a.precio_costo) : '—'}</strong>
+        </div>
+      </div>
+    </a>
+  `).join('');
+}
+
+// Filtros en tiempo real
+document.getElementById('f-buscar').addEventListener('input', filtrar);
+document.getElementById('f-tipo').addEventListener('change', filtrar);
+document.getElementById('f-inactivos').addEventListener('change', filtrar);
+
+init();
+</script>
+</body>
+</html>

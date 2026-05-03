@@ -4,6 +4,7 @@
 function renderNav(activeLink) {
   const links = [
     { href: "/admin/index.html",             icon: "📊", label: "Dashboard",    group: "Principal" },
+    { href: "/admin/articulos/index.html",    icon: "🏷", label: "Artículos",    group: "Catálogo" },
     { href: "/admin/ventas/nueva.html",       icon: "➕", label: "Nueva venta",  group: "Ventas" },
     { href: "/admin/ventas/index.html",      icon: "🛍", label: "Ver todas",    group: "Ventas" },
     { href: "/admin/compras/nueva.html",     icon: "➕", label: "Nueva compra", group: "Compras" },

@@ -31,6 +31,22 @@
 
     <form id="form-venta" style="opacity:0;transition:opacity .2s">
 
+      <!-- Selector de articulo -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Artículo del catálogo</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label" for="articulo_id">Artículo seleccionado</label>
+            <select class="form-control" id="articulo_id" style="max-width:400px">
+              <option value="">— Sin artículo del catálogo —</option>
+            </select>
+            <span style="font-size:.72rem;color:#888;margin-top:4px;display:block">
+              Cambiá el artículo para reemplazar los campos de abajo automáticamente.
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- Datos del cliente y canal -->
       <div class="panel">
         <div class="panel-header"><span class="panel-title">Cliente y canal</span></div>
@@ -182,6 +198,7 @@
 <script>
 const client = getClient();
 const id = new URLSearchParams(window.location.search).get('id');
+let _articulos = {};
 
 async function init() {
   const session = await requireAuth();
@@ -197,6 +214,17 @@ async function init() {
   poblarSelect('medio_pago',   MEDIOS_PAGO);
   poblarSelect('estado_envio', ESTADOS_ENVIO);
 
+  // Cargar articulos del catalogo
+  const { data: arts } = await client.from('articulos').select('*').eq('activo', true).order('nombre');
+  const selArt = document.getElementById('articulo_id');
+  (arts || []).forEach(a => {
+    _articulos[a.id] = a;
+    const opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = `${a.codigo ? '[' + a.codigo + '] ' : ''}${a.nombre}${a.tipo ? ' — ' + a.tipo : ''}`;
+    selArt.appendChild(opt);
+  });
+
   const { data, error } = await client.from('ventas').select('*').eq('id', id).single();
   if (error || !data) { showAlert('Venta no encontrada'); return; }
 
@@ -204,6 +232,19 @@ async function init() {
   rellenarForm(data);
   document.getElementById('form-venta').style.opacity = '1';
 }
+
+// Autocompletar al cambiar articulo
+document.getElementById('articulo_id').addEventListener('change', function() {
+  const art = _articulos[this.value];
+  if (!art) return;
+  document.getElementById('articulo').value    = art.nombre;
+  document.getElementById('tipo_prenda').value = art.tipo || '';
+  if (art.precio_venta) {
+    document.getElementById('precio_venta').value = art.precio_venta;
+    document.getElementById('precio_final').value = art.precio_venta;
+    document.getElementById('descuento').value    = '';
+  }
+});
 
 function poblarSelect(id, arr) {
   const sel = document.getElementById(id);
@@ -230,6 +271,7 @@ function rellenarForm(d) {
   document.getElementById('medio_pago').value       = d.medio_pago || '';
   document.getElementById('estado_envio').value     = d.estado_envio || '';
   document.getElementById('notas').value            = d.notas || '';
+  document.getElementById('articulo_id').value      = d.articulo_id || '';
 }
 
 // Auto-calcular precio final
@@ -267,6 +309,7 @@ document.getElementById('form-venta').addEventListener('submit', async (e) => {
       medio_pago:       document.getElementById('medio_pago').value || null,
       estado_envio:     document.getElementById('estado_envio').value,
       notas:            document.getElementById('notas').value.trim() || null,
+      articulo_id:      document.getElementById('articulo_id').value || null,
       updated_at:       new Date().toISOString(),
     };
 

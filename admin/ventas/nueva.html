@@ -31,6 +31,22 @@
 
     <form id="form-venta">
 
+      <!-- Selector de articulo -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Artículo del catálogo</span></div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="form-label" for="articulo_id">Seleccionar artículo</label>
+            <select class="form-control" id="articulo_id" style="max-width:400px">
+              <option value="">— Elegir del catálogo (opcional) —</option>
+            </select>
+            <span style="font-size:.72rem;color:#888;margin-top:4px;display:block">
+              Al seleccionar un artículo se completan automáticamente los campos de abajo. Podés editarlos.
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- Datos del cliente y canal -->
       <div class="panel">
         <div class="panel-header"><span class="panel-title">Cliente y canal</span></div>
@@ -180,6 +196,7 @@
 <script src="/admin/js/nav.js"></script>
 <script>
 const client = getClient();
+let _articulos = {};
 
 async function init() {
   const session = await requireAuth();
@@ -200,7 +217,31 @@ async function init() {
   // Defaults
   document.getElementById('estado_cobro').value = 'Pendiente';
   document.getElementById('estado_envio').value = 'Sin envio';
+
+  // Cargar articulos del catalogo
+  const { data: arts } = await client.from('articulos').select('*').eq('activo', true).order('nombre');
+  const selArt = document.getElementById('articulo_id');
+  (arts || []).forEach(a => {
+    _articulos[a.id] = a;
+    const opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = `${a.codigo ? '[' + a.codigo + '] ' : ''}${a.nombre}${a.tipo ? ' — ' + a.tipo : ''}`;
+    selArt.appendChild(opt);
+  });
 }
+
+// Autocompletar campos al elegir articulo
+document.getElementById('articulo_id').addEventListener('change', function() {
+  const art = _articulos[this.value];
+  if (!art) return;
+  document.getElementById('articulo').value     = art.nombre;
+  document.getElementById('tipo_prenda').value  = art.tipo || '';
+  if (art.precio_venta) {
+    document.getElementById('precio_venta').value  = art.precio_venta;
+    document.getElementById('precio_final').value  = art.precio_venta;
+    document.getElementById('descuento').value     = '';
+  }
+});
 
 function poblarSelect(id, arr) {
   const sel = document.getElementById(id);
@@ -246,6 +287,7 @@ document.getElementById('form-venta').addEventListener('submit', async (e) => {
       medio_pago:       document.getElementById('medio_pago').value || null,
       estado_envio:     document.getElementById('estado_envio').value,
       notas:            document.getElementById('notas').value.trim() || null,
+      articulo_id:      document.getElementById('articulo_id').value || null,
     };
 
     const { error } = await client.from('ventas').insert(payload);
