@@ -8,39 +8,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/admin/css/admin.css">
   <style>
-    /* ── Tabla ER ──────────────────────────────────────────── */
-    .er-wrap {
-      overflow-x: auto;
-      border-radius: 6px;
-      border: 1px solid #e8e0d8;
-    }
+    .er-wrap { overflow-x: auto; border: 1px solid #e8e0d8; border-radius: 6px; }
+
     .er-table {
       border-collapse: collapse;
-      min-width: 900px;
       width: 100%;
+      min-width: 860px;
       font-size: .82rem;
     }
+
     .er-table th, .er-table td {
-      padding: 9px 12px;
+      padding: 8px 14px;
       text-align: right;
       white-space: nowrap;
       border-bottom: 1px solid #f0ebe3;
     }
+
+    /* Primera columna fija */
     .er-table th:first-child,
     .er-table td:first-child {
       text-align: left;
       position: sticky;
       left: 0;
       z-index: 2;
-      min-width: 210px;
-      max-width: 210px;
+      min-width: 200px;
     }
-    /* Header de tabla */
+
+    /* Encabezado de tabla */
     .er-table thead th {
-      background: #0d0d0d;
+      background: #111;
       color: #fff;
+      font-size: .72rem;
       font-weight: 700;
-      font-size: .75rem;
       letter-spacing: .5px;
       text-transform: uppercase;
       border-bottom: none;
@@ -50,74 +49,56 @@
     }
     .er-table thead th:first-child { z-index: 4; }
 
-    /* Col total */
+    /* Columna total */
     .col-total {
       background: #f5f2ee !important;
       font-weight: 700 !important;
       border-left: 2px solid #d4c9b8 !important;
     }
-    .er-table td.col-total { border-left: 2px solid #e8e0d8; }
 
-    /* Tipos de fila */
-    .fila-header td {
-      background: #1a1a1a;
+    /* Fila de sección (INGRESOS, COSTO, etc.) */
+    .fila-seccion td {
+      background: #2a2a2a;
       color: #fff;
+      font-size: .72rem;
       font-weight: 700;
-      font-size: .8rem;
-      letter-spacing: .4px;
-      cursor: pointer;
-      user-select: none;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      padding-top: 10px;
+      padding-bottom: 10px;
     }
-    .fila-header td:first-child { background: #1a1a1a; }
-    .fila-header:hover td { background: #2a2a2a; }
+    .fila-seccion td:first-child { background: #2a2a2a; }
 
-    .fila-detalle td { background: #fff; color: #333; }
-    .fila-detalle td:first-child { background: #fff; padding-left: 24px; color: #555; }
+    /* Filas de detalle */
+    .fila-detalle td { background: #fff; color: #444; }
+    .fila-detalle td:first-child { background: #fff; padding-left: 28px; }
     .fila-detalle:hover td { background: #fafaf8; }
+    .fila-detalle:hover td:first-child { background: #fafaf8; }
 
+    /* Subtotales intermedios */
     .fila-subtotal td {
-      background: #f5f2ee;
+      background: #f0ece6;
       font-weight: 700;
-      color: #0d0d0d;
-      border-top: 2px solid #d4c9b8;
-      border-bottom: 2px solid #d4c9b8;
+      color: #111;
+      border-top: 1px solid #d4c9b8;
+      border-bottom: 1px solid #d4c9b8;
     }
-    .fila-subtotal td:first-child { background: #f5f2ee; }
+    .fila-subtotal td:first-child { background: #f0ece6; }
 
+    /* Resultados finales */
     .fila-resultado td {
       font-weight: 700;
-      font-size: .88rem;
-      border-top: 2px solid #0d0d0d;
-      border-bottom: 2px solid #0d0d0d;
+      font-size: .86rem;
+      border-top: 2px solid #111;
     }
-    .fila-resultado td:first-child { background: inherit; }
-    .fila-resultado.positivo td { background: #e8f5e9; color: #1b5e20; }
+    .fila-resultado.positivo td { background: #edf7ee; color: #1a5c1e; }
     .fila-resultado.negativo td { background: #fdecea; color: #b71c1c; }
-    .fila-resultado.neutro td   { background: #f5f2ee; color: #555; }
+    .fila-resultado.neutro   td { background: #f5f2ee; color: #555; }
+    .fila-resultado td:first-child { background: inherit; }
 
-    .fila-margen td {
-      background: #fafafa;
-      color: #888;
-      font-style: italic;
-      font-size: .78rem;
-      border-bottom: 1px solid #f0ebe3;
-    }
-    .fila-margen td:first-child {
-      background: #fafafa;
-      padding-left: 24px;
-    }
-
-    /* Toggle icon */
-    .toggle-icon { margin-right: 8px; font-size: .8rem; transition: transform .2s; display: inline-block; }
-    .seccion-cerrada .toggle-icon { transform: rotate(-90deg); }
-
-    /* Valores positivos/negativos en celdas detalle */
-    .val-neg { color: #c62828; }
-    .val-pos { color: #2e7d32; }
+    /* Valores */
+    .val-neg  { color: #c62828; }
     .val-cero { color: #ccc; }
-
-    /* Separador entre secciones */
-    .fila-spacer td { height: 6px; background: #f0ebe3; border: none; }
   </style>
 </head>
 <body>
@@ -134,44 +115,24 @@
 
   <main class="admin-main">
 
-    <!-- Encabezado + filtros -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
       <div>
         <div class="page-title">Estado de Resultados</div>
-        <div class="page-subtitle">Ingresos, costos y resultado — vista anual por mes</div>
+        <div class="page-subtitle">Ingresos, costos y resultado — por mes</div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
         <label class="form-label" style="margin:0">Año</label>
-        <select class="form-control" id="f-año" style="width:110px" onchange="cargarER()"></select>
+        <select class="form-control" id="f-ano" style="width:100px" onchange="cargarER()"></select>
         <button class="btn btn-secondary btn-sm" onclick="exportarCSV()">⬇ CSV</button>
       </div>
     </div>
 
-    <!-- KPIs rápidos -->
-    <div class="kpi-grid" style="margin-bottom:20px" id="kpi-er">
-      <div class="kpi-card black">
-        <div class="kpi-label">Ventas netas anuales</div>
-        <div class="kpi-value" id="kpi-ventas">—</div>
-      </div>
-      <div class="kpi-card cream">
-        <div class="kpi-label">Ganancia bruta</div>
-        <div class="kpi-value" id="kpi-bruta">—</div>
-        <div class="kpi-sub" id="kpi-bruta-pct">— margen</div>
-      </div>
-      <div class="kpi-card" id="kpi-card-neto" style="background:#e8f5e9">
-        <div class="kpi-label">Resultado neto</div>
-        <div class="kpi-value" id="kpi-neto">—</div>
-        <div class="kpi-sub" id="kpi-neto-pct">— margen</div>
-      </div>
-    </div>
-
-    <!-- Tabla ER -->
     <div class="panel" style="padding:0">
       <div class="er-wrap">
         <table class="er-table" id="er-table">
           <thead id="er-thead"></thead>
           <tbody id="er-tbody">
-            <tr><td colspan="14" style="text-align:center;padding:32px;color:#888">Cargando...</td></tr>
+            <tr><td colspan="14" style="text-align:center;padding:36px;color:#aaa">Cargando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -187,37 +148,7 @@
 <script>
 const client = getClient();
 
-// Estado de secciones colapsadas
-const secciones = { ingresos: true, costos: true, gastos: true };
-
-// Meses
 const MESES_LABEL = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
-// Definicion de filas del ER
-const FILAS = [
-  { tipo: 'header',   label: '▾  INGRESOS',              seccion: 'ingresos' },
-  { tipo: 'detalle',  label: 'Ventas brutas',             campo: 'ventas_brutas',  seccion: 'ingresos' },
-  { tipo: 'detalle',  label: '− Descuentos',              campo: 'descuentos',     seccion: 'ingresos', mostrarNeg: true },
-  { tipo: 'subtotal', label: 'Ventas netas',              campo: 'ventas_netas' },
-  { tipo: 'spacer' },
-
-  { tipo: 'header',   label: '▾  COSTO DE VENTAS',       seccion: 'costos' },
-  { tipo: 'detalle',  label: '− Materiales',              campo: 'materiales',     seccion: 'costos', mostrarNeg: true },
-  { tipo: 'detalle',  label: '− Confección',              campo: 'confeccion',     seccion: 'costos', mostrarNeg: true },
-  { tipo: 'detalle',  label: '− Estampado e impresión',   campo: 'estampado',      seccion: 'costos', mostrarNeg: true },
-  { tipo: 'resultado',label: 'GANANCIA BRUTA',            campo: 'ganancia_bruta' },
-  { tipo: 'margen',   label: 'Margen bruto',              campo: 'margen_bruto' },
-  { tipo: 'spacer' },
-
-  { tipo: 'header',   label: '▾  GASTOS OPERATIVOS',     seccion: 'gastos' },
-  { tipo: 'detalle',  label: '− Packaging',               campo: 'packaging',      seccion: 'gastos', mostrarNeg: true },
-  { tipo: 'detalle',  label: '− Marketing y contenido',   campo: 'marketing',      seccion: 'gastos', mostrarNeg: true },
-  { tipo: 'detalle',  label: '− Logística y envíos',      campo: 'logistica',      seccion: 'gastos', mostrarNeg: true },
-  { tipo: 'detalle',  label: '− Digital',                 campo: 'digital',        seccion: 'gastos', mostrarNeg: true },
-  { tipo: 'detalle',  label: '− Gastos varios',           campo: 'gastos_varios',  seccion: 'gastos', mostrarNeg: true },
-  { tipo: 'resultado',label: 'RESULTADO NETO',            campo: 'resultado_neto' },
-  { tipo: 'margen',   label: 'Margen neto',               campo: 'margen_neto' },
-];
 
 // Mapeo categoria_pl → campo interno
 const CAT_MAP = {
@@ -231,240 +162,173 @@ const CAT_MAP = {
   'Gastos varios':         'gastos_varios',
 };
 
-let _erData = null; // data global para export
+// Definicion de filas
+const FILAS = [
+  { tipo: 'seccion',   label: 'Ingresos' },
+  { tipo: 'detalle',   label: 'Ventas brutas',           campo: 'ventas_brutas' },
+  { tipo: 'detalle',   label: '− Descuentos',            campo: 'descuentos',    neg: true },
+  { tipo: 'subtotal',  label: 'Ventas netas',            campo: 'ventas_netas' },
+
+  { tipo: 'seccion',   label: 'Costo de ventas' },
+  { tipo: 'detalle',   label: '− Materiales',            campo: 'materiales',    neg: true },
+  { tipo: 'detalle',   label: '− Confección',            campo: 'confeccion',    neg: true },
+  { tipo: 'detalle',   label: '− Estampado e impresión', campo: 'estampado',     neg: true },
+  { tipo: 'resultado', label: 'Ganancia bruta',          campo: 'ganancia_bruta' },
+
+  { tipo: 'seccion',   label: 'Gastos operativos' },
+  { tipo: 'detalle',   label: '− Packaging',             campo: 'packaging',     neg: true },
+  { tipo: 'detalle',   label: '− Marketing y contenido', campo: 'marketing',     neg: true },
+  { tipo: 'detalle',   label: '− Logística y envíos',    campo: 'logistica',     neg: true },
+  { tipo: 'detalle',   label: '− Digital',               campo: 'digital',       neg: true },
+  { tipo: 'detalle',   label: '− Gastos varios',         campo: 'gastos_varios', neg: true },
+  { tipo: 'resultado', label: 'Resultado neto',          campo: 'resultado_neto' },
+];
+
+let _erData = null;
 
 async function init() {
   const session = await requireAuth();
   if (!session) return;
   renderNav('/admin/estado-resultados.html');
 
-  // Poblar selector de año
-  const selAño = document.getElementById('f-año');
-  const añoActual = new Date().getFullYear();
-  for (let a = añoActual + 1; a >= 2024; a--) {
+  const sel = document.getElementById('f-ano');
+  const hoy = new Date().getFullYear();
+  for (let a = hoy + 1; a >= 2024; a--) {
     const opt = document.createElement('option');
     opt.value = a; opt.textContent = a;
-    if (a === añoActual) opt.selected = true;
-    selAño.appendChild(opt);
+    if (a === hoy) opt.selected = true;
+    sel.appendChild(opt);
   }
 
   await cargarER();
 }
 
 async function cargarER() {
-  const año = parseInt(document.getElementById('f-año').value);
+  const ano = parseInt(document.getElementById('f-ano').value);
 
-  // Inicializar estructura mensual
+  const campos_cero = {
+    ventas_brutas: 0, descuentos: 0, ventas_netas: 0,
+    materiales: 0, confeccion: 0, estampado: 0,
+    packaging: 0, marketing: 0, logistica: 0, digital: 0, gastos_varios: 0,
+  };
+
   const data = {};
-  for (let m = 1; m <= 12; m++) {
-    data[m] = {
-      ventas_brutas: 0, descuentos: 0, ventas_netas: 0,
-      materiales: 0, confeccion: 0, estampado: 0,
-      packaging: 0, marketing: 0, logistica: 0, digital: 0, gastos_varios: 0,
-    };
-  }
+  for (let m = 1; m <= 12; m++) data[m] = { ...campos_cero };
 
-  // Consultas en paralelo
-  const [resVentas, resCompras] = await Promise.all([
-    client.from('ventas').select('fecha, precio_venta, descuento, precio_final')
-      .gte('fecha', `${año}-01-01`).lte('fecha', `${año}-12-31`),
-    client.from('compras').select('fecha, categoria_pl, monto_total')
-      .gte('fecha', `${año}-01-01`).lte('fecha', `${año}-12-31`),
+  const [resV, resC] = await Promise.all([
+    client.from('ventas').select('fecha,precio_venta,descuento,precio_final')
+      .gte('fecha', `${ano}-01-01`).lte('fecha', `${ano}-12-31`),
+    client.from('compras').select('fecha,categoria_pl,monto_total')
+      .gte('fecha', `${ano}-01-01`).lte('fecha', `${ano}-12-31`),
   ]);
 
-  // Procesar ventas
-  (resVentas.data || []).forEach(v => {
+  (resV.data || []).forEach(v => {
     const m = parseInt(v.fecha.split('-')[1]);
     data[m].ventas_brutas += Number(v.precio_venta) || 0;
-    data[m].descuentos    += Number(v.descuento) || 0;
+    data[m].descuentos    += Number(v.descuento)    || 0;
     data[m].ventas_netas  += Number(v.precio_final) || 0;
   });
 
-  // Procesar compras
-  (resCompras.data || []).forEach(c => {
-    const m     = parseInt(c.fecha.split('-')[1]);
+  (resC.data || []).forEach(c => {
+    const m = parseInt(c.fecha.split('-')[1]);
     const campo = CAT_MAP[c.categoria_pl];
     if (campo) data[m][campo] += Number(c.monto_total) || 0;
   });
 
-  // Calcular derivados por mes
   for (let m = 1; m <= 12; m++) {
     const d = data[m];
-    d.costo_ventas   = d.materiales + d.confeccion + d.estampado;
-    d.ganancia_bruta = d.ventas_netas - d.costo_ventas;
-    d.gastos_op      = d.packaging + d.marketing + d.logistica + d.digital + d.gastos_varios;
-    d.resultado_neto = d.ganancia_bruta - d.gastos_op;
-    d.margen_bruto   = d.ventas_netas > 0 ? (d.ganancia_bruta / d.ventas_netas * 100) : null;
-    d.margen_neto    = d.ventas_netas > 0 ? (d.resultado_neto  / d.ventas_netas * 100) : null;
+    d.ganancia_bruta = d.ventas_netas - (d.materiales + d.confeccion + d.estampado);
+    d.resultado_neto = d.ganancia_bruta - (d.packaging + d.marketing + d.logistica + d.digital + d.gastos_varios);
   }
 
   // Totales anuales
-  const total = {};
-  const campos = Object.keys(data[1]);
-  campos.forEach(c => {
+  const total = { ...campos_cero };
+  Object.keys(total).forEach(c => {
     total[c] = Object.values(data).reduce((s, m) => s + (m[c] || 0), 0);
   });
-  total.margen_bruto = total.ventas_netas > 0 ? (total.ganancia_bruta / total.ventas_netas * 100) : null;
-  total.margen_neto  = total.ventas_netas > 0 ? (total.resultado_neto  / total.ventas_netas * 100) : null;
+  total.ganancia_bruta = total.ventas_netas - (total.materiales + total.confeccion + total.estampado);
+  total.resultado_neto = total.ganancia_bruta - (total.packaging + total.marketing + total.logistica + total.digital + total.gastos_varios);
 
-  _erData = { data, total, año };
-
-  actualizarKPIs(total);
+  _erData = { data, total, ano };
   renderTabla(data, total);
-}
-
-function actualizarKPIs(t) {
-  document.getElementById('kpi-ventas').textContent = pesos(t.ventas_netas);
-
-  document.getElementById('kpi-bruta').textContent    = pesos(t.ganancia_bruta);
-  document.getElementById('kpi-bruta-pct').textContent= t.margen_bruto != null
-    ? Math.round(t.margen_bruto) + '% margen bruto' : '—';
-
-  const netoEl   = document.getElementById('kpi-neto');
-  const netoPct  = document.getElementById('kpi-neto-pct');
-  const cardNeto = document.getElementById('kpi-card-neto');
-  netoEl.textContent  = pesos(t.resultado_neto);
-  netoPct.textContent = t.margen_neto != null ? Math.round(t.margen_neto) + '% margen neto' : '—';
-  cardNeto.style.background = t.resultado_neto >= 0 ? '#e8f5e9' : '#fdecea';
-  netoEl.style.color        = t.resultado_neto >= 0 ? '#1b5e20' : '#b71c1c';
 }
 
 function renderTabla(data, total) {
   // Encabezado
-  const thead = document.getElementById('er-thead');
-  thead.innerHTML = `
+  document.getElementById('er-thead').innerHTML = `
     <tr>
-      <th class="col-label" style="min-width:210px">Concepto</th>
+      <th>Concepto</th>
       ${MESES_LABEL.map(m => `<th>${m}</th>`).join('')}
       <th class="col-total">Total</th>
     </tr>`;
 
-  // Cuerpo
   const tbody = document.getElementById('er-tbody');
   tbody.innerHTML = '';
 
   FILAS.forEach(fila => {
-    if (fila.tipo === 'spacer') {
-      const tr = document.createElement('tr');
-      tr.className = 'fila-spacer';
-      tr.innerHTML = `<td colspan="14"></td>`;
-      tbody.appendChild(tr);
-      return;
-    }
-
     const tr = document.createElement('tr');
-    tr.className = `fila-${fila.tipo}`;
+    tr.className = 'fila-' + fila.tipo;
 
-    if (fila.seccion && fila.tipo === 'detalle' || fila.tipo === 'margen') {
-      tr.dataset.seccion = fila.seccion;
-      if (!secciones[fila.seccion]) tr.style.display = 'none';
-    }
-
-    if (fila.tipo === 'header') {
-      tr.dataset.seccion = fila.seccion;
-      tr.innerHTML = `<td colspan="14" onclick="toggleSeccion('${fila.seccion}', this)">
-        <span class="toggle-icon">▾</span>${fila.label.replace('▾  ', '')}
-      </td>`;
-      if (!secciones[fila.seccion]) {
-        tr.classList.add('seccion-cerrada');
-      }
+    // Fila de sección (título de bloque)
+    if (fila.tipo === 'seccion') {
+      tr.innerHTML = `<td colspan="14">${fila.label}</td>`;
       tbody.appendChild(tr);
       return;
     }
 
+    // Fila de resultado (ganancia bruta / resultado neto)
     if (fila.tipo === 'resultado') {
-      const val = total[fila.campo] || 0;
-      const cls = val > 0 ? 'positivo' : val < 0 ? 'negativo' : 'neutro';
-      tr.classList.add(cls);
+      const vt = total[fila.campo] || 0;
+      tr.classList.add(vt > 0 ? 'positivo' : vt < 0 ? 'negativo' : 'neutro');
       tr.innerHTML = `
         <td>${fila.label}</td>
-        ${Array.from({length:12}, (_,i) => {
+        ${Array.from({length:12}, (_, i) => {
           const v = data[i+1][fila.campo] || 0;
-          return `<td style="color:${v > 0 ? '#1b5e20' : v < 0 ? '#b71c1c' : '#aaa'}">${v !== 0 ? pesos(v) : '—'}</td>`;
+          const color = v > 0 ? '#1a5c1e' : v < 0 ? '#b71c1c' : '#ccc';
+          return `<td style="color:${color}">${v !== 0 ? pesos(v) : '—'}</td>`;
         }).join('')}
-        <td class="col-total" style="color:${val > 0 ? '#1b5e20' : val < 0 ? '#b71c1c' : '#aaa'}">${pesos(val)}</td>`;
-      tbody.appendChild(tr);
-      return;
-    }
-
-    if (fila.tipo === 'margen') {
-      const val = total[fila.campo];
-      tr.innerHTML = `
-        <td>${fila.label}</td>
-        ${Array.from({length:12}, (_,i) => {
-          const v = data[i+1][fila.campo];
-          return `<td>${v != null ? Math.round(v) + '%' : '—'}</td>`;
-        }).join('')}
-        <td class="col-total">${val != null ? Math.round(val) + '%' : '—'}</td>`;
+        <td class="col-total" style="color:${vt > 0 ? '#1a5c1e' : vt < 0 ? '#b71c1c' : '#ccc'}">${vt !== 0 ? pesos(vt) : '—'}</td>`;
       tbody.appendChild(tr);
       return;
     }
 
     // Detalle y subtotal
-    const valTotal = total[fila.campo] || 0;
+    const vt = total[fila.campo] || 0;
     tr.innerHTML = `
       <td>${fila.label}</td>
-      ${Array.from({length:12}, (_,i) => {
+      ${Array.from({length:12}, (_, i) => {
         const v = data[i+1][fila.campo] || 0;
         if (v === 0) return `<td class="val-cero">—</td>`;
-        if (fila.mostrarNeg) return `<td class="val-neg">(${pesos(v)})</td>`;
-        return `<td>${pesos(v)}</td>`;
+        return fila.neg
+          ? `<td class="val-neg">(${pesos(v)})</td>`
+          : `<td>${pesos(v)}</td>`;
       }).join('')}
-      <td class="col-total">${valTotal !== 0
-        ? (fila.mostrarNeg ? `<span class="val-neg">(${pesos(valTotal)})</span>` : pesos(valTotal))
-        : '<span class="val-cero">—</span>'
-      }</td>`;
-
+      <td class="col-total">${vt !== 0
+        ? (fila.neg ? `<span class="val-neg">(${pesos(vt)})</span>` : pesos(vt))
+        : '<span class="val-cero">—</span>'}</td>`;
     tbody.appendChild(tr);
-  });
-}
-
-function toggleSeccion(seccion, celda) {
-  secciones[seccion] = !secciones[seccion];
-  const abierto = secciones[seccion];
-
-  // Toggle icono en el header
-  const tr = celda.parentElement;
-  tr.classList.toggle('seccion-cerrada', !abierto);
-
-  // Mostrar/ocultar filas de la sección
-  document.querySelectorAll(`[data-seccion="${seccion}"]:not(.fila-header)`).forEach(row => {
-    row.style.display = abierto ? '' : 'none';
   });
 }
 
 function exportarCSV() {
   if (!_erData) return;
-  const { data, total, año } = _erData;
-
-  const header = ['Concepto', ...MESES_LABEL, 'Total Anual'].join(',');
-  const lineas = [header];
+  const { data, total, ano } = _erData;
+  const rows = [['Concepto', ...MESES_LABEL, 'Total'].join(',')];
 
   FILAS.forEach(f => {
-    if (f.tipo === 'spacer') return;
-    if (f.tipo === 'header') {
-      lineas.push(`"${f.label.replace('▾  ','')}",${Array(13).fill('').join(',')}`);
+    if (f.tipo === 'seccion') {
+      rows.push(`"${f.label}",${Array(13).fill('').join(',')}`);
       return;
     }
-    if (f.tipo === 'margen') {
-      const vals = Array.from({length:12}, (_,i) => {
-        const v = data[i+1][f.campo];
-        return v != null ? Math.round(v) + '%' : '';
-      });
-      const t = total[f.campo] != null ? Math.round(total[f.campo]) + '%' : '';
-      lineas.push([`"${f.label}"`, ...vals, t].join(','));
-      return;
-    }
-    const vals = Array.from({length:12}, (_,i) => Math.round(data[i+1][f.campo] || 0));
-    const t = Math.round(total[f.campo] || 0);
-    lineas.push([`"${f.label}"`, ...vals, t].join(','));
+    const vals = Array.from({length:12}, (_, i) => Math.round(data[i+1][f.campo] || 0));
+    rows.push([`"${f.label}"`, ...vals, Math.round(total[f.campo] || 0)].join(','));
   });
 
-  const blob = new Blob([lineas.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = `ROPA_ER_${año}.csv`; a.click();
-  URL.revokeObjectURL(url);
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ROPA_ER_${ano}.csv`;
+  a.click();
 }
 
 init();
