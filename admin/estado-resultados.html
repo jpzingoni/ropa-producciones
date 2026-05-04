@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estado de Resultados — Admin ROPA*</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <style>
+    /* ── Tabla ER ──────────────────────────────────────────── */
+    .er-wrap {
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #e8e0d8;
+    }
+    .er-table {
+      border-collapse: collapse;
+      min-width: 900px;
+      width: 100%;
+      font-size: .82rem;
+    }
+    .er-table th, .er-table td {
+      padding: 9px 12px;
+      text-align: right;
+      white-space: nowrap;
+      border-bottom: 1px solid #f0ebe3;
+    }
+    .er-table th:first-child,
+    .er-table td:first-child {
+      text-align: left;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      min-width: 210px;
+      max-width: 210px;
+    }
+    /* Header de tabla */
+    .er-table thead th {
+      background: #0d0d0d;
+      color: #fff;
+      font-weight: 700;
+      font-size: .75rem;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      border-bottom: none;
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+    .er-table thead th:first-child { z-index: 4; }
+
+    /* Col total */
+    .col-total {
+      background: #f5f2ee !important;
+      font-weight: 700 !important;
+      border-left: 2px solid #d4c9b8 !important;
+    }
+    .er-table td.col-total { border-left: 2px solid #e8e0d8; }
+
+    /* Tipos de fila */
+    .fila-header td {
+      background: #1a1a1a;
+      color: #fff;
+      font-weight: 700;
+      font-size: .8rem;
+      letter-spacing: .4px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .fila-header td:first-child { background: #1a1a1a; }
+    .fila-header:hover td { background: #2a2a2a; }
+
+    .fila-detalle td { background: #fff; color: #333; }
+    .fila-detalle td:first-child { background: #fff; padding-left: 24px; color: #555; }
+    .fila-detalle:hover td { background: #fafaf8; }
+
+    .fila-subtotal td {
+      background: #f5f2ee;
+      font-weight: 700;
+      color: #0d0d0d;
+      border-top: 2px solid #d4c9b8;
+      border-bottom: 2px solid #d4c9b8;
+    }
+    .fila-subtotal td:first-child { background: #f5f2ee; }
+
+    .fila-resultado td {
+      font-weight: 700;
+      font-size: .88rem;
+      border-top: 2px solid #0d0d0d;
+      border-bottom: 2px solid #0d0d0d;
+    }
+    .fila-resultado td:first-child { background: inherit; }
+    .fila-resultado.positivo td { background: #e8f5e9; color: #1b5e20; }
+    .fila-resultado.negativo td { background: #fdecea; color: #b71c1c; }
+    .fila-resultado.neutro td   { background: #f5f2ee; color: #555; }
+
+    .fila-margen td {
+      background: #fafafa;
+      color: #888;
+      font-style: italic;
+      font-size: .78rem;
+      border-bottom: 1px solid #f0ebe3;
+    }
+    .fila-margen td:first-child {
+      background: #fafafa;
+      padding-left: 24px;
+    }
+
+    /* Toggle icon */
+    .toggle-icon { margin-right: 8px; font-size: .8rem; transition: transform .2s; display: inline-block; }
+    .seccion-cerrada .toggle-icon { transform: rotate(-90deg); }
+
+    /* Valores positivos/negativos en celdas detalle */
+    .val-neg { color: #c62828; }
+    .val-pos { color: #2e7d32; }
+    .val-cero { color: #ccc; }
+
+    /* Separador entre secciones */
+    .fila-spacer td { height: 6px; background: #f0ebe3; border: none; }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+
+  <header class="admin-header">
+    <button class="btn-menu" id="btn-menu" style="background:none;border:none;color:#888;font-size:1.2rem;display:none">☰</button>
+    <span class="logo">ROPA<span>*</span></span>
+    <span class="header-title">Panel administrativo</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <nav class="admin-sidebar" id="sidebar"></nav>
+
+  <main class="admin-main">
+
+    <!-- Encabezado + filtros -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="page-title">Estado de Resultados</div>
+        <div class="page-subtitle">Ingresos, costos y resultado — vista anual por mes</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <label class="form-label" style="margin:0">Año</label>
+        <select class="form-control" id="f-año" style="width:110px" onchange="cargarER()"></select>
+        <button class="btn btn-secondary btn-sm" onclick="exportarCSV()">⬇ CSV</button>
+      </div>
+    </div>
+
+    <!-- KPIs rápidos -->
+    <div class="kpi-grid" style="margin-bottom:20px" id="kpi-er">
+      <div class="kpi-card black">
+        <div class="kpi-label">Ventas netas anuales</div>
+        <div class="kpi-value" id="kpi-ventas">—</div>
+      </div>
+      <div class="kpi-card cream">
+        <div class="kpi-label">Ganancia bruta</div>
+        <div class="kpi-value" id="kpi-bruta">—</div>
+        <div class="kpi-sub" id="kpi-bruta-pct">— margen</div>
+      </div>
+      <div class="kpi-card" id="kpi-card-neto" style="background:#e8f5e9">
+        <div class="kpi-label">Resultado neto</div>
+        <div class="kpi-value" id="kpi-neto">—</div>
+        <div class="kpi-sub" id="kpi-neto-pct">— margen</div>
+      </div>
+    </div>
+
+    <!-- Tabla ER -->
+    <div class="panel" style="padding:0">
+      <div class="er-wrap">
+        <table class="er-table" id="er-table">
+          <thead id="er-thead"></thead>
+          <tbody id="er-tbody">
+            <tr><td colspan="14" style="text-align:center;padding:32px;color:#888">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/admin/js/config.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/nav.js"></script>
+<script>
+const client = getClient();
+
+// Estado de secciones colapsadas
+const secciones = { ingresos: true, costos: true, gastos: true };
+
+// Meses
+const MESES_LABEL = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+// Definicion de filas del ER
+const FILAS = [
+  { tipo: 'header',   label: '▾  INGRESOS',              seccion: 'ingresos' },
+  { tipo: 'detalle',  label: 'Ventas brutas',             campo: 'ventas_brutas',  seccion: 'ingresos' },
+  { tipo: 'detalle',  label: '− Descuentos',              campo: 'descuentos',     seccion: 'ingresos', mostrarNeg: true },
+  { tipo: 'subtotal', label: 'Ventas netas',              campo: 'ventas_netas' },
+  { tipo: 'spacer' },
+
+  { tipo: 'header',   label: '▾  COSTO DE VENTAS',       seccion: 'costos' },
+  { tipo: 'detalle',  label: '− Materiales',              campo: 'materiales',     seccion: 'costos', mostrarNeg: true },
+  { tipo: 'detalle',  label: '− Confección',              campo: 'confeccion',     seccion: 'costos', mostrarNeg: true },
+  { tipo: 'detalle',  label: '− Estampado e impresión',   campo: 'estampado',      seccion: 'costos', mostrarNeg: true },
+  { tipo: 'resultado',label: 'GANANCIA BRUTA',            campo: 'ganancia_bruta' },
+  { tipo: 'margen',   label: 'Margen bruto',              campo: 'margen_bruto' },
+  { tipo: 'spacer' },
+
+  { tipo: 'header',   label: '▾  GASTOS OPERATIVOS',     seccion: 'gastos' },
+  { tipo: 'detalle',  label: '− Packaging',               campo: 'packaging',      seccion: 'gastos', mostrarNeg: true },
+  { tipo: 'detalle',  label: '− Marketing y contenido',   campo: 'marketing',      seccion: 'gastos', mostrarNeg: true },
+  { tipo: 'detalle',  label: '− Logística y envíos',      campo: 'logistica',      seccion: 'gastos', mostrarNeg: true },
+  { tipo: 'detalle',  label: '− Digital',                 campo: 'digital',        seccion: 'gastos', mostrarNeg: true },
+  { tipo: 'detalle',  label: '− Gastos varios',           campo: 'gastos_varios',  seccion: 'gastos', mostrarNeg: true },
+  { tipo: 'resultado',label: 'RESULTADO NETO',            campo: 'resultado_neto' },
+  { tipo: 'margen',   label: 'Margen neto',               campo: 'margen_neto' },
+];
+
+// Mapeo categoria_pl → campo interno
+const CAT_MAP = {
+  'Materiales':            'materiales',
+  'Estampado e impresion': 'estampado',
+  'Confeccion':            'confeccion',
+  'Packaging':             'packaging',
+  'Marketing y contenido': 'marketing',
+  'Logistica y envios':    'logistica',
+  'Digital':               'digital',
+  'Gastos varios':         'gastos_varios',
+};
+
+let _erData = null; // data global para export
+
+async function init() {
+  const session = await requireAuth();
+  if (!session) return;
+  renderNav('/admin/estado-resultados.html');
+
+  // Poblar selector de año
+  const selAño = document.getElementById('f-año');
+  const añoActual = new Date().getFullYear();
+  for (let a = añoActual + 1; a >= 2024; a--) {
+    const opt = document.createElement('option');
+    opt.value = a; opt.textContent = a;
+    if (a === añoActual) opt.selected = true;
+    selAño.appendChild(opt);
+  }
+
+  await cargarER();
+}
+
+async function cargarER() {
+  const año = parseInt(document.getElementById('f-año').value);
+
+  // Inicializar estructura mensual
+  const data = {};
+  for (let m = 1; m <= 12; m++) {
+    data[m] = {
+      ventas_brutas: 0, descuentos: 0, ventas_netas: 0,
+      materiales: 0, confeccion: 0, estampado: 0,
+      packaging: 0, marketing: 0, logistica: 0, digital: 0, gastos_varios: 0,
+    };
+  }
+
+  // Consultas en paralelo
+  const [resVentas, resCompras] = await Promise.all([
+    client.from('ventas').select('fecha, precio_venta, descuento, precio_final')
+      .gte('fecha', `${año}-01-01`).lte('fecha', `${año}-12-31`),
+    client.from('compras').select('fecha, categoria_pl, monto_total')
+      .gte('fecha', `${año}-01-01`).lte('fecha', `${año}-12-31`),
+  ]);
+
+  // Procesar ventas
+  (resVentas.data || []).forEach(v => {
+    const m = parseInt(v.fecha.split('-')[1]);
+    data[m].ventas_brutas += Number(v.precio_venta) || 0;
+    data[m].descuentos    += Number(v.descuento) || 0;
+    data[m].ventas_netas  += Number(v.precio_final) || 0;
+  });
+
+  // Procesar compras
+  (resCompras.data || []).forEach(c => {
+    const m     = parseInt(c.fecha.split('-')[1]);
+    const campo = CAT_MAP[c.categoria_pl];
+    if (campo) data[m][campo] += Number(c.monto_total) || 0;
+  });
+
+  // Calcular derivados por mes
+  for (let m = 1; m <= 12; m++) {
+    const d = data[m];
+    d.costo_ventas   = d.materiales + d.confeccion + d.estampado;
+    d.ganancia_bruta = d.ventas_netas - d.costo_ventas;
+    d.gastos_op      = d.packaging + d.marketing + d.logistica + d.digital + d.gastos_varios;
+    d.resultado_neto = d.ganancia_bruta - d.gastos_op;
+    d.margen_bruto   = d.ventas_netas > 0 ? (d.ganancia_bruta / d.ventas_netas * 100) : null;
+    d.margen_neto    = d.ventas_netas > 0 ? (d.resultado_neto  / d.ventas_netas * 100) : null;
+  }
+
+  // Totales anuales
+  const total = {};
+  const campos = Object.keys(data[1]);
+  campos.forEach(c => {
+    total[c] = Object.values(data).reduce((s, m) => s + (m[c] || 0), 0);
+  });
+  total.margen_bruto = total.ventas_netas > 0 ? (total.ganancia_bruta / total.ventas_netas * 100) : null;
+  total.margen_neto  = total.ventas_netas > 0 ? (total.resultado_neto  / total.ventas_netas * 100) : null;
+
+  _erData = { data, total, año };
+
+  actualizarKPIs(total);
+  renderTabla(data, total);
+}
+
+function actualizarKPIs(t) {
+  document.getElementById('kpi-ventas').textContent = pesos(t.ventas_netas);
+
+  document.getElementById('kpi-bruta').textContent    = pesos(t.ganancia_bruta);
+  document.getElementById('kpi-bruta-pct').textContent= t.margen_bruto != null
+    ? Math.round(t.margen_bruto) + '% margen bruto' : '—';
+
+  const netoEl   = document.getElementById('kpi-neto');
+  const netoPct  = document.getElementById('kpi-neto-pct');
+  const cardNeto = document.getElementById('kpi-card-neto');
+  netoEl.textContent  = pesos(t.resultado_neto);
+  netoPct.textContent = t.margen_neto != null ? Math.round(t.margen_neto) + '% margen neto' : '—';
+  cardNeto.style.background = t.resultado_neto >= 0 ? '#e8f5e9' : '#fdecea';
+  netoEl.style.color        = t.resultado_neto >= 0 ? '#1b5e20' : '#b71c1c';
+}
+
+function renderTabla(data, total) {
+  // Encabezado
+  const thead = document.getElementById('er-thead');
+  thead.innerHTML = `
+    <tr>
+      <th class="col-label" style="min-width:210px">Concepto</th>
+      ${MESES_LABEL.map(m => `<th>${m}</th>`).join('')}
+      <th class="col-total">Total</th>
+    </tr>`;
+
+  // Cuerpo
+  const tbody = document.getElementById('er-tbody');
+  tbody.innerHTML = '';
+
+  FILAS.forEach(fila => {
+    if (fila.tipo === 'spacer') {
+      const tr = document.createElement('tr');
+      tr.className = 'fila-spacer';
+      tr.innerHTML = `<td colspan="14"></td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    const tr = document.createElement('tr');
+    tr.className = `fila-${fila.tipo}`;
+
+    if (fila.seccion && fila.tipo === 'detalle' || fila.tipo === 'margen') {
+      tr.dataset.seccion = fila.seccion;
+      if (!secciones[fila.seccion]) tr.style.display = 'none';
+    }
+
+    if (fila.tipo === 'header') {
+      tr.dataset.seccion = fila.seccion;
+      tr.innerHTML = `<td colspan="14" onclick="toggleSeccion('${fila.seccion}', this)">
+        <span class="toggle-icon">▾</span>${fila.label.replace('▾  ', '')}
+      </td>`;
+      if (!secciones[fila.seccion]) {
+        tr.classList.add('seccion-cerrada');
+      }
+      tbody.appendChild(tr);
+      return;
+    }
+
+    if (fila.tipo === 'resultado') {
+      const val = total[fila.campo] || 0;
+      const cls = val > 0 ? 'positivo' : val < 0 ? 'negativo' : 'neutro';
+      tr.classList.add(cls);
+      tr.innerHTML = `
+        <td>${fila.label}</td>
+        ${Array.from({length:12}, (_,i) => {
+          const v = data[i+1][fila.campo] || 0;
+          return `<td style="color:${v > 0 ? '#1b5e20' : v < 0 ? '#b71c1c' : '#aaa'}">${v !== 0 ? pesos(v) : '—'}</td>`;
+        }).join('')}
+        <td class="col-total" style="color:${val > 0 ? '#1b5e20' : val < 0 ? '#b71c1c' : '#aaa'}">${pesos(val)}</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    if (fila.tipo === 'margen') {
+      const val = total[fila.campo];
+      tr.innerHTML = `
+        <td>${fila.label}</td>
+        ${Array.from({length:12}, (_,i) => {
+          const v = data[i+1][fila.campo];
+          return `<td>${v != null ? Math.round(v) + '%' : '—'}</td>`;
+        }).join('')}
+        <td class="col-total">${val != null ? Math.round(val) + '%' : '—'}</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    // Detalle y subtotal
+    const valTotal = total[fila.campo] || 0;
+    tr.innerHTML = `
+      <td>${fila.label}</td>
+      ${Array.from({length:12}, (_,i) => {
+        const v = data[i+1][fila.campo] || 0;
+        if (v === 0) return `<td class="val-cero">—</td>`;
+        if (fila.mostrarNeg) return `<td class="val-neg">(${pesos(v)})</td>`;
+        return `<td>${pesos(v)}</td>`;
+      }).join('')}
+      <td class="col-total">${valTotal !== 0
+        ? (fila.mostrarNeg ? `<span class="val-neg">(${pesos(valTotal)})</span>` : pesos(valTotal))
+        : '<span class="val-cero">—</span>'
+      }</td>`;
+
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleSeccion(seccion, celda) {
+  secciones[seccion] = !secciones[seccion];
+  const abierto = secciones[seccion];
+
+  // Toggle icono en el header
+  const tr = celda.parentElement;
+  tr.classList.toggle('seccion-cerrada', !abierto);
+
+  // Mostrar/ocultar filas de la sección
+  document.querySelectorAll(`[data-seccion="${seccion}"]:not(.fila-header)`).forEach(row => {
+    row.style.display = abierto ? '' : 'none';
+  });
+}
+
+function exportarCSV() {
+  if (!_erData) return;
+  const { data, total, año } = _erData;
+
+  const header = ['Concepto', ...MESES_LABEL, 'Total Anual'].join(',');
+  const lineas = [header];
+
+  FILAS.forEach(f => {
+    if (f.tipo === 'spacer') return;
+    if (f.tipo === 'header') {
+      lineas.push(`"${f.label.replace('▾  ','')}",${Array(13).fill('').join(',')}`);
+      return;
+    }
+    if (f.tipo === 'margen') {
+      const vals = Array.from({length:12}, (_,i) => {
+        const v = data[i+1][f.campo];
+        return v != null ? Math.round(v) + '%' : '';
+      });
+      const t = total[f.campo] != null ? Math.round(total[f.campo]) + '%' : '';
+      lineas.push([`"${f.label}"`, ...vals, t].join(','));
+      return;
+    }
+    const vals = Array.from({length:12}, (_,i) => Math.round(data[i+1][f.campo] || 0));
+    const t = Math.round(total[f.campo] || 0);
+    lineas.push([`"${f.label}"`, ...vals, t].join(','));
+  });
+
+  const blob = new Blob([lineas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `ROPA_ER_${año}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+init();
+</script>
+</body>
+</html>

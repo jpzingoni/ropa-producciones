@@ -9,8 +9,9 @@ function renderNav(activeLink) {
     { href: "/admin/ventas/index.html",      icon: "🛍", label: "Ver todas",    group: "Ventas" },
     { href: "/admin/compras/nueva.html",     icon: "➕", label: "Nueva compra", group: "Compras" },
     { href: "/admin/compras/index.html",     icon: "📋", label: "Ver todas",    group: "Compras" },
-    { href: "/admin/proveedores/index.html", icon: "🏭", label: "Proveedores",  group: "Datos" },
-    { href: "/admin/resumen.html",           icon: "📈", label: "Resumen",      group: "Datos" },
+    { href: "/admin/proveedores/index.html",   icon: "🏭", label: "Proveedores",        group: "Datos" },
+    { href: "/admin/resumen.html",             icon: "📈", label: "Resumen",            group: "Datos" },
+    { href: "/admin/estado-resultados.html",   icon: "📑", label: "Estado de Resultados", group: "Datos" },
   ];
 
   // Agrupar
