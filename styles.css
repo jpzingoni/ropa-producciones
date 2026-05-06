@@ -73,20 +73,21 @@ a {
 .nav-proyecto {
   font-family: var(--font-body);
   font-size: 0.72rem;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.08em;
-  color: var(--white);
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.4rem 0.9rem;
+  color: var(--black);
+  background: var(--white);
+  border: 1px solid var(--white);
+  padding: 0.45rem 1rem;
   border-radius: 2px;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.2s, color 0.2s;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .nav-proyecto:hover {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: var(--white);
 }
 
 .nav-ig {
