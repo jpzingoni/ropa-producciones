@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentación — ROPA* Producciones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --negro:  #0d0d0d;
+      --blanco: #ffffff;
+      --cream:  #f0ebe3;
+      --gris:   #888;
+      --acento: #d4c9b8;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #e5e5e5;
+      color: var(--negro);
+    }
+
+    /* ── Página ──────────────────────────────────────────────── */
+    .pagina {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto 20px;
+      background: var(--blanco);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Utilidades tipográficas ─────────────────────────────── */
+    .font-grotesk { font-family: 'Space Grotesk', sans-serif; }
+    .upper        { text-transform: uppercase; letter-spacing: .12em; }
+
+    /* ── PORTADA ─────────────────────────────────────────────── */
+    .portada {
+      background: var(--negro);
+      color: var(--blanco);
+      min-height: 297mm;
+      justify-content: space-between;
+      padding: 18mm 16mm;
+    }
+
+    .portada-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .logo-portada {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--blanco);
+    }
+    .logo-portada span { color: var(--acento); }
+
+    .tag-portada {
+      font-size: .68rem;
+      color: var(--gris);
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      margin-top: 4px;
+    }
+
+    .portada-centro {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20mm 0 10mm;
+    }
+
+    .portada-eyebrow {
+      font-size: .72rem;
+      color: var(--acento);
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      margin-bottom: 16px;
+    }
+
+    .portada-titulo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.8rem;
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--blanco);
+    }
+    .portada-titulo .acento { color: var(--acento); }
+
+    .portada-bajada {
+      margin-top: 24px;
+      font-size: .9rem;
+      color: #aaa;
+      line-height: 1.7;
+      max-width: 120mm;
+    }
+
+    .portada-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-top: 1px solid #2a2a2a;
+      padding-top: 10mm;
+    }
+
+    .portada-fecha {
+      font-size: .72rem;
+      color: var(--gris);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .portada-pagnum {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .72rem;
+      color: #333;
+    }
+
+    /* ── PÁGINAS INTERNAS ────────────────────────────────────── */
+    .pagina-interna {
+      padding: 14mm 16mm 12mm;
+    }
+
+    .nav-pag {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12mm;
+    }
+
+    .nav-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--negro);
+    }
+    .nav-logo span { color: var(--gris); }
+
+    .nav-num {
+      font-size: .68rem;
+      color: var(--gris);
+      letter-spacing: .1em;
+    }
+
+    .seccion-label {
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: .22em;
+      color: var(--gris);
+      margin-bottom: 6px;
+    }
+
+    .page-titulo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 10mm;
+    }
+
+    .divider {
+      width: 32px;
+      height: 2px;
+      background: var(--negro);
+      margin-bottom: 10mm;
+    }
+
+    /* Bloque de texto */
+    .parrafo {
+      font-size: .85rem;
+      line-height: 1.75;
+      color: #333;
+      margin-bottom: 7mm;
+    }
+    .parrafo strong { color: var(--negro); font-weight: 600; }
+
+    /* Lista de items */
+    .lista {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4mm;
+      margin-bottom: 8mm;
+    }
+    .lista li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .85rem;
+      color: #333;
+      line-height: 1.6;
+    }
+    .lista li::before {
+      content: '—';
+      color: var(--gris);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Cita / highlight */
+    .cita {
+      border-left: 3px solid var(--negro);
+      padding: 5mm 8mm;
+      background: var(--cream);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 500;
+      line-height: 1.5;
+      margin-bottom: 8mm;
+      color: var(--negro);
+    }
+
+    /* Grid de 2 columnas */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8mm;
+      margin-bottom: 8mm;
+    }
+
+    .card-item {
+      background: var(--cream);
+      padding: 6mm;
+      border-radius: 4px;
+    }
+    .card-item .card-icon {
+      font-size: 1.4rem;
+      margin-bottom: 3mm;
+    }
+    .card-item .card-titulo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 2mm;
+    }
+    .card-item .card-desc {
+      font-size: .78rem;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    /* Bloque negro destacado */
+    .bloque-negro {
+      background: var(--negro);
+      color: var(--blanco);
+      padding: 8mm 10mm;
+      border-radius: 4px;
+      margin-bottom: 8mm;
+    }
+    .bloque-negro .bn-label {
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      color: var(--acento);
+      margin-bottom: 4mm;
+    }
+    .bloque-negro .bn-texto {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      line-height: 1.55;
+    }
+
+    /* Número grande */
+    .num-grande {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--negro);
+      line-height: 1;
+    }
+
+    /* Fila de métricas */
+    .metricas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6mm;
+      margin-bottom: 8mm;
+    }
+    .metrica {
+      text-align: center;
+      padding: 5mm;
+      background: var(--cream);
+      border-radius: 4px;
+    }
+    .metrica .m-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--negro);
+    }
+    .metrica .m-label {
+      font-size: .7rem;
+      color: var(--gris);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-top: 2px;
+    }
+
+    /* PÁGINA CIERRE */
+    .cierre {
+      background: var(--negro);
+      color: var(--blanco);
+      min-height: 297mm;
+      justify-content: space-between;
+      padding: 18mm 16mm;
+    }
+    .cierre-centro {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .cierre-titulo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 8mm;
+    }
+    .cierre-titulo .acento { color: var(--acento); }
+    .cierre-sub {
+      font-size: .9rem;
+      color: #aaa;
+      line-height: 1.7;
+      max-width: 110mm;
+    }
+    .cierre-bottom {
+      border-top: 1px solid #2a2a2a;
+      padding-top: 8mm;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .cierre-contacto {
+      font-size: .8rem;
+      color: var(--acento);
+      line-height: 1.8;
+    }
+    .cierre-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #333;
+    }
+    .cierre-logo span { color: var(--acento); }
+
+    /* ── PRINT ───────────────────────────────────────────────── */
+    @media print {
+      body { background: white; }
+      .pagina {
+        margin: 0;
+        page-break-after: always;
+        break-after: page;
+      }
+      .pagina:last-child { page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     PORTADA
+═══════════════════════════════════════════════════════════ -->
+<div class="pagina portada">
+
+  <div class="portada-top">
+    <div>
+      <div class="logo-portada">ROPA<span>*</span></div>
+      <div class="tag-portada">Registro y Obra Producción Argentina</div>
+    </div>
+  </div>
+
+  <div class="portada-centro">
+    <div class="portada-eyebrow">Presentación de proyecto</div>
+    <div class="portada-titulo">
+      Del registro<br>
+      al <span class="acento">resultado.</span>
+    </div>
+    <div class="portada-bajada">
+      Cómo transformamos la gestión de un emprendimiento de moda
+      en un sistema claro, funcional y propio — desde la primera venta
+      hasta el estado de resultados.
+    </div>
+  </div>
+
+  <div class="portada-bottom">
+    <div class="portada-fecha">Mayo 2026</div>
+    <div class="portada-pagnum">01 / 06</div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     01 — EL DIAGNÓSTICO
+═══════════════════════════════════════════════════════════ -->
+<div class="pagina pagina-interna">
+
+  <div class="nav-pag">
+    <div class="nav-logo">ROPA<span>*</span></div>
+    <div class="nav-num">02 / 06</div>
+  </div>
+
+  <div class="seccion-label">El diagnóstico</div>
+  <div class="page-titulo">Un negocio con identidad<br>sin sistema.</div>
+  <div class="divider"></div>
+
+  <div class="parrafo">
+    Cuando nos acercamos al equipo de ROPA* Producciones, encontramos algo que
+    se repite en muchos emprendimientos creativos: <strong>una marca con carácter propio,
+    pero sin estructura que la sostenga desde adentro.</strong>
+  </div>
+
+  <div class="parrafo">
+    La gestión del día a día se resolvía de forma rudimentaria — anotaciones dispersas,
+    conversaciones de WhatsApp como archivo, y sin ninguna fuente única de información
+    que permitiera entender realmente cómo estaba funcionando el negocio.
+  </div>
+
+  <div class="cita">
+    "No alcanza con saber que vendiste. Hay que saber cuánto costó vender."
+  </div>
+
+  <div class="parrafo">
+    El verdadero problema no era la falta de herramientas — era la falta de <strong>visibilidad.</strong>
+    Sin un registro consolidado, cada decisión se toma a ciegas: no se conoce el margen real,
+    no se puede proyectar, y es difícil saber qué funciona y qué no.
+  </div>
+
+  <ul class="lista">
+    <li>Ventas registradas en forma aislada, sin trazabilidad</li>
+    <li>Compras y costos sin categorización para análisis</li>
+    <li>Sin presencia digital propia que genere confianza</li>
+    <li>Información crítica dispersa, difícil de consultar</li>
+  </ul>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     02 — EL PROCESO
+═══════════════════════════════════════════════════════════ -->
+<div class="pagina pagina-interna">
+
+  <div class="nav-pag">
+    <div class="nav-logo">ROPA<span>*</span></div>
+    <div class="nav-num">03 / 06</div>
+  </div>
+
+  <div class="seccion-label">El proceso</div>
+  <div class="page-titulo">Pensado en conjunto,<br>construido en etapas.</div>
+  <div class="divider"></div>
+
+  <div class="parrafo">
+    El proyecto no se diseñó desde afuera. Se construyó en conversación directa
+    con el equipo, entendiendo la lógica propia del negocio — sus productos, sus canales,
+    su forma de operar. <strong>Cada módulo responde a una necesidad real, no a una plantilla.</strong>
+  </div>
+
+  <div class="grid-2">
+    <div class="card-item">
+      <div class="card-icon">🗺</div>
+      <div class="card-titulo">Mapeo de aristas</div>
+      <div class="card-desc">Identificamos los ejes del negocio: productos, proveedores, ventas, compras y resultado económico.</div>
+    </div>
+    <div class="card-item">
+      <div class="card-icon">🔁</div>
+      <div class="card-titulo">Iteración continua</div>
+      <div class="card-desc">Cada pantalla se validó en uso real. El sistema fue ajustándose a la forma de trabajar del equipo.</div>
+    </div>
+    <div class="card-item">
+      <div class="card-icon">📐</div>
+      <div class="card-titulo">Diseño sin complejidad</div>
+      <div class="card-desc">La premisa fue claridad sobre funciones. Sin fricciones, sin curva de aprendizaje.</div>
+    </div>
+    <div class="card-item">
+      <div class="card-icon">🔐</div>
+      <div class="card-titulo">Acceso por roles</div>
+      <div class="card-desc">Cada usuario ve lo que necesita. El sistema distingue entre administradores y usuarios de sólo lectura.</div>
+    </div>
+  </div>
+
+  <div class="parrafo">
+    La tecnología elegida — base de datos en la nube, hosting estático, sin dependencia
+    de terceros para el día a día — garantiza que el sistema pueda sostenerse y crecer
+    <strong>sin costos fijos significativos.</strong>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     03 — LA PRESENCIA
+═══════════════════════════════════════════════════════════ -->
+<div class="pagina pagina-interna">
+
+  <div class="nav-pag">
+    <div class="nav-logo">ROPA<span>*</span></div>
+    <div class="nav-num">04 / 06</div>
+  </div>
+
+  <div class="seccion-label">La solución · Presencia</div>
+  <div class="page-titulo">Existir en internet<br>no es opcional.</div>
+  <div class="divider"></div>
+
+  <div class="parrafo">
+    El primer paso fue darle a ROPA* un lugar propio en la web. No una tienda,
+    no un catálogo genérico — <strong>una landing page que comunica quién es la marca
+    antes de mostrar qué vende.</strong>
+  </div>
+
+  <div class="bloque-negro">
+    <div class="bn-label">La premisa</div>
+    <div class="bn-texto">
+      Tener un dominio propio y una presencia cuidada genera confianza.
+      En un canal como Instagram, el link en la bio es la primera impresión
+      fuera de la red — y tiene que estar a la altura.
+    </div>
+  </div>
+
+  <div class="parrafo">
+    El sitio presenta la cápsula SUR — la primera colección — con imágenes propias,
+    identidad visual coherente con la marca, y un flujo directo hacia la compra
+    por mensaje directo en Instagram. Sin intermediarios, sin plataformas de terceros.
+  </div>
+
+  <ul class="lista">
+    <li>Dominio propio: <strong>ropaproduccionarg.com.ar</strong></li>
+    <li>Landing page de colección con galería de productos y precios</li>
+    <li>Botón de compra directo vía Instagram DM</li>
+    <li>Diseño responsive — funciona en celular y desktop</li>
+    <li>Carga rápida, sin dependencias de plataformas externas</li>
+  </ul>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     04 — LA ADMINISTRACIÓN
+═══════════════════════════════════════════════════════════ -->
+<div class="pagina pagina-interna">
+
+  <div class="nav-pag">
+    <div class="nav-logo">ROPA<span>*</span></div>
+    <div class="nav-num">05 / 06</div>
+  </div>
+
+  <div class="seccion-label">La solución · Administración</div>
+  <div class="page-titulo">Un panel privado,<br>una sola fuente de verdad.</div>
+  <div class="divider"></div>
+
+  <div class="parrafo">
+    Paralelo al sitio público, se construyó un panel administrativo privado —
+    accesible desde cualquier dispositivo con conexión — que centraliza toda
+    la operación del negocio en un solo lugar.
+  </div>
+
+  <div class="grid-2">
+    <div class="card-item">
+      <div class="card-icon">🏷</div>
+      <div class="card-titulo">Catálogo de artículos</div>
+      <div class="card-desc">Maestro de productos con talle, tipo, precio de venta y costo. Base para el resto del sistema.</div>
+    </div>
+    <div class="card-item">
+      <div class="card-icon">🛍</div>
+      <div class="card-titulo">Registro de ventas</div>
+      <div class="card-desc">Canal, cliente, artículo, precio, descuento, cobro y envío. Historial completo con filtros.</div>
+    </div>
+    <div class="card-item">
+      <div class="card-icon">📋</div>
+      <div class="card-titulo">Registro de compras</div>
+      <div class="card-desc">Cada gasto categorizado para el P&L: materiales, confección, marketing, logística y más.</div>
+    </div>
+    <div class="card-item">
+      <div class="card-icon">🏭</div>
+      <div class="card-titulo">Proveedores</div>
+      <div class="card-desc">Directorio de proveedores activos con contacto, categoría y condición de pago.</div>
+    </div>
+  </div>
+
+  <div class="parrafo">
+    Cada venta y cada compra registrada alimenta automáticamente el análisis financiero.
+    No hay doble entrada, no hay riesgo de inconsistencias — <strong>el dato se carga una vez
+    y fluye a todos los reportes.</strong>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     05 — EL RESULTADO
+═══════════════════════════════════════════════════════════ -->
+<div class="pagina pagina-interna">
+
+  <div class="nav-pag">
+    <div class="nav-logo">ROPA<span>*</span></div>
+    <div class="nav-num">06 / 06</div>
+  </div>
+
+  <div class="seccion-label">El resultado</div>
+  <div class="page-titulo">Entender la lógica<br>del negocio.</div>
+  <div class="divider"></div>
+
+  <div class="parrafo">
+    El cierre del sistema es el <strong>Estado de Resultados</strong> — una tabla mensual que
+    consolida ingresos, costos y gastos operativos, y devuelve algo que antes no existía:
+    una respuesta concreta a la pregunta más importante de cualquier negocio.
+  </div>
+
+  <div class="cita">
+    ¿Cuánto quedó realmente después de producir, vender y operar?
+  </div>
+
+  <div class="parrafo">
+    El ER no es un complemento. Es el punto de llegada de todo lo anterior.
+    Cada categoría de compra, cada descuento en una venta, cada decisión operativa
+    se refleja en el resultado final — visible, mes a mes, de un vistazo.
+  </div>
+
+  <div class="metricas">
+    <div class="metrica">
+      <div class="m-num">Ventas</div>
+      <div class="m-label">brutas y netas<br>por mes</div>
+    </div>
+    <div class="metrica">
+      <div class="m-num">Costos</div>
+      <div class="m-label">de producción<br>categorizados</div>
+    </div>
+    <div class="metrica">
+      <div class="m-num">Margen</div>
+      <div class="m-label">bruto y neto<br>en tiempo real</div>
+    </div>
+  </div>
+
+  <div class="parrafo">
+    Con esta base, ROPA* puede tomar decisiones con datos: cuándo escalar,
+    dónde reducir costos, qué canal es más rentable, cómo planificar
+    la próxima colección. <strong>El sistema deja de ser un registro para convertirse
+    en una herramienta de gestión real.</strong>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     CIERRE
+═══════════════════════════════════════════════════════════ -->
+<div class="pagina cierre">
+
+  <div class="portada-top">
+    <div class="logo-portada">ROPA<span>*</span></div>
+  </div>
+
+  <div class="cierre-centro">
+    <div class="cierre-titulo">
+      Registro claro.<br>
+      Decisiones <span class="acento">mejores.</span>
+    </div>
+    <div class="cierre-sub">
+      Este proyecto demuestra que con las herramientas correctas y
+      un proceso bien pensado, cualquier emprendimiento puede operar
+      con la claridad de una empresa — sin la complejidad de una.
+    </div>
+  </div>
+
+  <div class="cierre-bottom">
+    <div class="cierre-contacto">
+      ropaproduccionarg.com.ar<br>
+      @ropa.produccionesarg
+    </div>
+    <div class="cierre-logo">ROPA<span>*</span></div>
+  </div>
+
+</div>
+
+</body>
+</html>
