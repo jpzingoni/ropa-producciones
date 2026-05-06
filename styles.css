@@ -416,6 +416,13 @@ a {
   gap: 0.35rem;
 }
 
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.9rem;
+}
+
 .footer-logo {
   font-family: var(--font-title);
   font-size: 1.5rem;
@@ -446,6 +453,23 @@ a {
 
 .footer-ig:hover {
   color: var(--white);
+}
+
+.footer-proyecto {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.footer-proyecto:hover {
+  color: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .footer-copy {
