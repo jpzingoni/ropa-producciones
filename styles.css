@@ -115,6 +115,7 @@ a {
   justify-content: center;
   text-align: center;
   overflow: hidden;
+  background: #000;
 }
 
 .hero-bg {
@@ -165,14 +166,14 @@ a {
 .hero-ghost {
   position: absolute;
   font-family: var(--font-title);
-  font-size: clamp(8rem, 26vw, 22rem);
+  font-size: clamp(5rem, 16vw, 13rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
   color: rgba(255, 255, 255, 0.12);
   white-space: nowrap;
   pointer-events: none;
-  transform: translateX(8%);
+  transform: translate(18%, -30%);
   z-index: 0;
 }
 
