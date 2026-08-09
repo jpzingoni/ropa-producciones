@@ -166,7 +166,7 @@ a {
 .hero-ghost {
   position: absolute;
   font-family: var(--font-title);
-  font-size: clamp(5rem, 16vw, 13rem);
+  font-size: clamp(4rem, 12vw, 10rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
