@@ -158,7 +158,7 @@ a {
 
 .hero-ghost {
   position: absolute;
-  top: 8%;
+  top: 14%;
   right: 8%;
   font-family: var(--font-title);
   font-size: clamp(4rem, 12vw, 10rem);
