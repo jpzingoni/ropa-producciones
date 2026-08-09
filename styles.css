@@ -156,15 +156,10 @@ a {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.hero-title-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .hero-ghost {
   position: absolute;
+  top: 22%;
+  right: 5%;
   font-family: var(--font-title);
   font-size: clamp(4rem, 12vw, 10rem);
   font-weight: 700;
@@ -173,7 +168,6 @@ a {
   color: rgba(255, 255, 255, 0.12);
   white-space: nowrap;
   pointer-events: none;
-  transform: translate(45%, -130%);
   z-index: 0;
 }
 
