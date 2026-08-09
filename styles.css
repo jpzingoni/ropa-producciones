@@ -155,7 +155,30 @@ a {
   color: rgba(255, 255, 255, 0.5);
 }
 
+.hero-title-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-ghost {
+  position: absolute;
+  font-family: var(--font-title);
+  font-size: clamp(8rem, 26vw, 22rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(8%);
+  z-index: 0;
+}
+
 .hero-title {
+  position: relative;
+  z-index: 1;
   font-family: var(--font-title);
   font-size: clamp(5rem, 18vw, 14rem);
   font-weight: 700;
